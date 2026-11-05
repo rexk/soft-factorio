@@ -22,6 +22,17 @@ REPOS = json.loads((FACTORY / "evals" / "repos.json").read_text())
 # Read-only shell commands an agent may run without a person approving them.
 # File edits are allowed through acceptEdits; anything else is denied, as a
 # person who isn't there can't approve it.
+FAKES = FACTORY / "evals" / "fakes"
+
+# Committing and shipping, for scenarios that end in a pull request or an
+# issue. Pushes go to a local bare repository; gh is the fake in evals/fakes.
+SHIP_TOOLS = [
+    "Bash(git checkout:*)", "Bash(git switch:*)", "Bash(git branch:*)",
+    "Bash(git add:*)", "Bash(git commit:*)", "Bash(git push:*)", "Bash(git fetch:*)",
+    "Bash(git remote:*)", "Bash(git rev-parse:*)", "Bash(git merge-base:*)",
+    "Bash(gh:*)",
+]
+
 READ_ONLY_BASH = [
     "Bash(ls:*)", "Bash(cat:*)", "Bash(head:*)", "Bash(tail:*)", "Bash(wc:*)",
     "Bash(find:*)", "Bash(grep:*)", "Bash(tree:*)", "Bash(pwd)",
@@ -70,12 +81,40 @@ def snapshot(name: str, dest: Path) -> Path:
     sh(["git", "clone", "--quiet", "--no-hardlinks", str(source), str(dest)])
     git(dest, "checkout", "--quiet", "-B", "main", spec["commit"])
     git(dest, "remote", "remove", "origin")
-    hook = dest / ".git" / "hooks" / "pre-push"
-    hook.write_text("#!/bin/sh\necho 'eval snapshot: pushing is disabled' >&2\nexit 1\n")
-    hook.chmod(0o755)
+    guard_pushes(dest)
     git(dest, "config", "user.name", "eval-runner")
     git(dest, "config", "user.email", "eval-runner@invalid")
     return dest
+
+
+def guard_pushes(repo: Path) -> None:
+    """Refuse every push except to a local remote inside the eval folder."""
+    hook = repo / ".git" / "hooks" / "pre-push"
+    hook.parent.mkdir(parents=True, exist_ok=True)
+    hook.write_text(
+        "#!/bin/sh\n"
+        f'case "$2" in "{workdir()}"/*) exit 0;; esac\n'
+        "echo 'eval repo: pushing anywhere but the local eval remote is disabled' >&2\n"
+        "exit 1\n")
+    hook.chmod(0o755)
+
+
+def add_local_remote(repo: Path) -> Path:
+    """Give repo an origin: a bare repository next to it, with main pushed."""
+    bare = repo.parent / f"{repo.name}-remote.git"
+    if bare.exists():
+        shutil.rmtree(bare)
+    sh(["git", "init", "--quiet", "--bare", str(bare)])
+    git(repo, "remote", "add", "origin", str(bare))
+    git(repo, "push", "--quiet", "-u", "origin", "HEAD:main")
+    return bare
+
+
+def gh_calls(log: Path) -> list[dict]:
+    """What the agent did on the fake GitHub."""
+    if not log.exists():
+        return []
+    return [json.loads(l) for l in log.read_text().splitlines() if l.strip()]
 
 
 def empty_repo(dest: Path) -> Path:
@@ -87,6 +126,7 @@ def empty_repo(dest: Path) -> Path:
     git(dest, "config", "user.name", "eval-runner")
     git(dest, "config", "user.email", "eval-runner@invalid")
     git(dest, "commit", "--quiet", "--allow-empty", "-m", "Initial commit")
+    guard_pushes(dest)
     return dest
 
 
@@ -107,14 +147,30 @@ def preinstall_factory(repo: Path, upstream: str = "no") -> None:
 
 def apply_tools() -> tuple[list[str], list[str]]:
     """Extra tools and directories an agent needs to follow START.md here."""
+    return apply_tools_for(FACTORY)
+
+
+def agent_apply(repo: Path, logdir: Path, model: str, upstream: str = "no",
+                factory: Path = FACTORY, gh_log: Path | None = None) -> AgentRun:
+    """A session that applies (or updates) the factory by following its START.md."""
+    tools, dirs = apply_tools_for(factory)
+    prompt = (f"Apply the software factory to this repository by following "
+              f"{factory}/START.md. The factory is the local checkout at {factory}.")
+    if upstream:
+        prompt += f" My answer to the upstream question: {upstream}."
+    run = run_agent(repo, prompt, logdir / "apply.jsonl", model, extra_tools=tools,
+                    add_dirs=dirs, fake_gh_log=gh_log)
+    (logdir / "apply-reply.txt").write_text(run.result)
+    return run
+
+
+def apply_tools_for(factory: Path) -> tuple[list[str], list[str]]:
     tools = [
-        f"Read({FACTORY}/**)",
-        f"Bash(python3 {FACTORY}/tools/factory.py:*)",
-        "Bash(git checkout:*)", "Bash(git switch:*)", "Bash(git branch:*)",
-        "Bash(git add:*)", "Bash(git commit:*)", "Bash(git remote:*)",
+        f"Read({factory}/**)",
+        f"Bash(python3 {factory}/tools/factory.py:*)",
         "Bash(git -C:*)", "Bash(git ls-remote:*)",
-    ]
-    return tools, [str(FACTORY)]
+    ] + SHIP_TOOLS
+    return tools, [str(factory)]
 
 
 @dataclass
@@ -130,7 +186,7 @@ class AgentRun:
 def run_agent(repo: Path, prompt: str, log: Path, model: str, budget_usd: float = 5.0,
               timeout_s: int = 1800, extra_tools: list[str] | None = None,
               session: str | None = None, resume: bool = False,
-              add_dirs: list[str] | None = None) -> AgentRun:
+              add_dirs: list[str] | None = None, fake_gh_log: Path | None = None) -> AgentRun:
     """One headless agent turn in repo. The transcript goes to log.
 
     For a conversation, pass the same session id each turn, with resume=True
@@ -152,10 +208,17 @@ def run_agent(repo: Path, prompt: str, log: Path, model: str, budget_usd: float 
         cmd += ["--resume", session] if resume else ["--session-id", session]
     else:
         cmd.append("--no-session-persistence")
+    env = dict(os.environ)
+    if fake_gh_log:
+        env["PATH"] = f"{FAKES}{os.pathsep}{env.get('PATH', '')}"
+        env["FAKE_GH_LOG"] = str(fake_gh_log)
+        origin = git(repo, "remote", "get-url", "origin", check=False).strip()
+        if origin.startswith(str(workdir())):  # a local eval remote: show it as GitHub
+            env["FAKE_GIT_REMOTE"] = origin
     log.parent.mkdir(parents=True, exist_ok=True)
     with log.open("w") as fh:
         try:
-            subprocess.run(cmd, cwd=repo, stdout=fh, stderr=subprocess.STDOUT,
+            subprocess.run(cmd, cwd=repo, stdout=fh, stderr=subprocess.STDOUT, env=env,
                            stdin=subprocess.DEVNULL, timeout=timeout_s, text=True)
         except subprocess.TimeoutExpired:
             pass
@@ -183,6 +246,21 @@ def parse_transcript(log: Path) -> AgentRun:
             turns = int(ev.get("num_turns") or 0)
             err = bool(ev.get("is_error"))
     return AgentRun(result, cost, turns, err, tools, skills)
+
+
+def tool_inputs(log: Path, names: tuple[str, ...]) -> list[dict]:
+    """The inputs of every call the agent made to the named tools."""
+    found = []
+    for line in log.read_text().splitlines() if log.exists() else []:
+        try:
+            ev = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if ev.get("type") == "assistant":
+            for block in ev.get("message", {}).get("content", []):
+                if block.get("type") == "tool_use" and block.get("name") in names:
+                    found.append(block.get("input", {}))
+    return found
 
 
 @dataclass

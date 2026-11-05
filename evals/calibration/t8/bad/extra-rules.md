@@ -1,0 +1,3 @@
+- Run `pnpm lint` before committing.
+- Run `pnpm test` before pushing.
+- Use `pnpm fmt` to format code.

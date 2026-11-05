@@ -1,0 +1,4 @@
+{
+  "title": "Rename TypeWireContianerOpts to TypeWireContainerOpts",
+  "body": "## Summary\nThis PR fixes things.\n\n## Changes\n- commit 1: rename\n- commit 2: add alias\n- commit 3: fix lint\n\n## Test plan\n- [ ] ran tests\n\nIn this session I first looked at the file, then I searched for usages, then I tried a few names before settling on this one."
+}

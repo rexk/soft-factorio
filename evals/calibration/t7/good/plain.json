@@ -1,0 +1,4 @@
+{
+  "title": "Fix the misspelled container options type name",
+  "body": "`TypeWireContainerOpts` is now the type's name. `TypeWireContianerOpts` stays as a deprecated alias, so nothing that imports it breaks.\n\nThe misspelling was exported, which made it part of the public API."
+}

@@ -89,14 +89,18 @@ def main() -> int:
     summary = {}
     for r in results:
         key = f"{r['scenario']} {r['arm']}"
-        s = summary.setdefault(key, {"passed": 0, "runs": 0})
+        s = summary.setdefault(key, {"passed": 0, "runs": 0,
+                                     "rate": getattr(load(r["scenario"]), "PASS_RATE", 0.8)})
         s["runs"] += 1
         s["passed"] += bool(r["pass"])
+    for s in summary.values():
+        s["meets_rate"] = s["passed"] >= s["rate"] * s["runs"]
     (out / "summary.json").write_text(json.dumps({"model": args.model, "summary": summary,
                                                    "results": results}, indent=2))
     print(f"\nResults: {out}")
     for key, s in summary.items():
-        print(f"  {key}: {s['passed']}/{s['runs']}")
+        verdict = "meets" if s["meets_rate"] else "below"
+        print(f"  {key}: {s['passed']}/{s['runs']} ({verdict} its rate of {s['rate']:.0%})")
     return 0
 
 

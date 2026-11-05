@@ -1,0 +1,4 @@
+{
+  "title": "Fixed typo.",
+  "body": "Renames the misspelled type and keeps the old name as a deprecated alias so existing imports still compile."
+}

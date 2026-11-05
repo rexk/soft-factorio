@@ -1,0 +1,112 @@
+#!/usr/bin/env python3
+"""A stand-in for the GitHub CLI during evals: logs every call, contacts nothing.
+
+Each call is appended to $FAKE_GH_LOG as one JSON line: the arguments, plus
+the title and body of any pull request or issue it creates or edits. Pull
+requests are remembered per branch, so `gh pr view <branch>` finds one this
+run opened.
+"""
+
+import json
+import os
+import subprocess
+import sys
+from pathlib import Path
+
+LOG = Path(os.environ.get("FAKE_GH_LOG", "fake-gh.jsonl"))
+REPO = "example/repo"
+
+
+def flag(args, *names):
+    for i, a in enumerate(args):
+        for n in names:
+            if a == n and i + 1 < len(args):
+                return args[i + 1]
+            if a.startswith(n + "="):
+                return a.split("=", 1)[1]
+    return None
+
+
+def body_of(args):
+    body = flag(args, "--body", "-b")
+    path = flag(args, "--body-file", "-F")
+    if path == "-":
+        return sys.stdin.read()
+    if path:
+        try:
+            return Path(path).read_text()
+        except OSError:
+            return None
+    return body
+
+
+def calls():
+    if not LOG.exists():
+        return []
+    return [json.loads(l) for l in LOG.read_text().splitlines() if l.strip()]
+
+
+def log(entry):
+    with LOG.open("a") as fh:
+        fh.write(json.dumps(entry) + "\n")
+
+
+def current_branch():
+    r = subprocess.run(["git", "rev-parse", "--abbrev-ref", "HEAD"], capture_output=True, text=True)
+    return r.stdout.strip()
+
+
+def main(args):
+    cmd = " ".join(args[:2])
+    entry = {"args": args}
+    if args[:2] == ["auth", "status"]:
+        print("Logged in to github.com account eval-user")
+        log(entry)
+        return 0
+    if args[:2] == ["repo", "view"]:
+        print(json.dumps({"nameWithOwner": REPO, "defaultBranchRef": {"name": "main"}}))
+        log(entry)
+        return 0
+    if args[:2] in (["pr", "create"], ["issue", "create"]):
+        kind = args[0]
+        made = [c for c in calls() if c.get("created") == kind]
+        number = len(made) + 1
+        entry.update(created=kind, number=number, title=flag(args, "--title", "-t"),
+                     body=body_of(args), base=flag(args, "--base", "-B"),
+                     head=flag(args, "--head", "-H") or current_branch(),
+                     repo=flag(args, "--repo", "-R"))
+        log(entry)
+        print(f"https://github.com/{entry['repo'] or REPO}/{'pull' if kind == 'pr' else 'issues'}/{number}")
+        return 0
+    if args[:2] == ["pr", "edit"]:
+        entry.update(edited="pr", title=flag(args, "--title", "-t"), body=body_of(args))
+        log(entry)
+        print(f"https://github.com/{REPO}/pull/{args[2] if len(args) > 2 else 1}")
+        return 0
+    if args[:2] in (["pr", "view"], ["pr", "list"]):
+        branch = args[2] if args[:2] == ["pr", "view"] and len(args) > 2 and not args[2].startswith("-") \
+            else current_branch()
+        prs = [c for c in calls() if c.get("created") == "pr" and c.get("head") == branch]
+        log(entry)
+        if args[1] == "list":
+            print(json.dumps([{"number": p["number"], "url": f"https://github.com/{REPO}/pull/{p['number']}",
+                               "state": "OPEN", "title": p["title"]} for p in prs]))
+            return 0
+        if not prs:
+            print(f'no pull requests found for branch "{branch}"', file=sys.stderr)
+            return 1
+        p = prs[-1]
+        print(json.dumps({"number": p["number"], "url": f"https://github.com/{REPO}/pull/{p['number']}",
+                          "state": "OPEN", "title": p["title"]}))
+        return 0
+    if args[:2] == ["issue", "list"]:
+        log(entry)
+        print("[]")
+        return 0
+    log(entry)
+    print(f"(fake gh: '{cmd}' accepted, nothing done)", file=sys.stderr)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

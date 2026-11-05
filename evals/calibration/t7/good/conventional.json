@@ -1,0 +1,4 @@
+{
+  "title": "fix(core): rename TypeWireContianerOpts to TypeWireContainerOpts",
+  "body": "Renames the misspelled `TypeWireContianerOpts` type to `TypeWireContainerOpts` and keeps the old name as a deprecated alias, so existing imports still compile.\n\nThe typo is in the public API, so new users copy it from the docs. Removing the alias can wait for the next major version.\n\n**Look at:** the `@deprecated` note on the alias in `packages/core/src/index.ts`.\n\nTests weren't run locally; CI will run them.\n\n\ud83e\udd16 Generated with [Claude Code](https://claude.com/claude-code)"
+}

@@ -1,0 +1,32 @@
+#!/usr/bin/env python3
+"""Real git, made to look like the repository's remote is on GitHub.
+
+The eval's origin is a local bare repository ($FAKE_GIT_REMOTE). Agents that
+see a local path rightly conclude there is no GitHub to open a pull request
+on, so this wrapper runs the real git and shows that path as $FAKE_GIT_URL
+in everything git prints. Pushes still go to the local repository, and the
+push guard hook still sees the real path.
+"""
+
+import os
+import shutil
+import subprocess
+import sys
+
+here = os.path.dirname(os.path.abspath(__file__))
+search = os.pathsep.join(p for p in os.environ.get("PATH", "").split(os.pathsep)
+                         if p and os.path.abspath(p) != here)
+real = shutil.which("git", path=search)
+if real is None:
+    sys.exit("fake git: no real git on PATH")
+
+remote = os.environ.get("FAKE_GIT_REMOTE")
+if not remote:
+    os.execv(real, [real, *sys.argv[1:]])
+
+url = os.environ.get("FAKE_GIT_URL", "https://github.com/example/repo.git")
+done = subprocess.run([real, *sys.argv[1:]], capture_output=True)
+for data, stream in ((done.stdout, sys.stdout.buffer), (done.stderr, sys.stderr.buffer)):
+    stream.write(data.replace(remote.encode(), url.encode()))
+    stream.flush()
+sys.exit(done.returncode)

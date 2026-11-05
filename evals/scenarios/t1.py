@@ -24,6 +24,7 @@ import lib
 ID = "T1"
 BEHAVIOURS = ["B1", "B6"]
 REPO = None  # an empty repository, as the design brief specifies
+PASS_RATE = 0.8
 TASK = "add a settings page"
 ANSWER = "It's for people using a small web app. You decide the rest."
 APPLY = ("Apply the software factory to this repository by following "

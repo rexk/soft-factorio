@@ -1,0 +1,1 @@
+- Before committing, always run `pnpm lint`.

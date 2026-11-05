@@ -1,8 +1,8 @@
 ## Software factory
 
 How agents work in this repository. Skills are in `.agents/skills/` (copied
-to `.claude/skills/`). The repository's own rules outside this block win
-over it.
+to `.claude/skills/`); guides are in `.agents/factory/guides/`. The
+repository's own rules outside this block win over it.
 
 - **Check intent before building.** When an ask is vague or would change what
   gets built, use `outcome-brief`: agree a product brief (value and behaviour)
@@ -10,7 +10,7 @@ over it.
   approval; a yes to the brief is. Small, clear asks: say the outcome in two
   lines, then work.
 - **Prompt for outcomes.** When you hand work to another agent, state the
-  value and the finish line, not the steps.
+  value and the finish line, not the steps (`prompting-for-outcomes.md`).
 - **Report in pages.** Results, reviews and questions with structure go in an
   HTML page (`html-for-humans`), not a long chat reply.
 - **Ship for review.** Finished, committed work goes out as one pull request
@@ -18,8 +18,12 @@ over it.
 - **Test behaviour.** Tests prove what the code does for its users, fail when
   that breaks and survive a refactor. Never assert only that a field exists
   or a function was called.
+- **Learn from corrections.** When the person corrects you during a task,
+  finish with `retro`: each correction becomes a reviewable fix in a test, a
+  rule or a skill.
 - **Keep rules lean.** This file holds what an agent can't infer from the
-  repository.
+  repository; add a rule as one short line outside this block
+  (`rules-files.md`).
 
 The block between the `soft-factorio` markers is installed by the factory
 and updated by reapplying it. Edits inside it are kept on update and
