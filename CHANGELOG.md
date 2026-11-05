@@ -7,5 +7,9 @@ file to report what changed since the version a repository has installed.
 
 - Seed skills: `outcome-brief`, `html-for-humans`, `create-pr`.
 - Rules block for a repository's `AGENTS.md`, with a settings table.
-- Scenario eval runner (`evals/`) with the first scenario, T1.
+- Scenario eval runner (`evals/`): snapshots of local or pinned repositories,
+  multi-turn runs with a scripted person, judges calibrated on samples
+  (`--calibrate`), and the first scenario, T1.
+- `outcome-brief`: "you decide" hands over the decisions, not the approval;
+  the agent writes the brief and stops until the person approves it.
 - Privacy scan and one check command (`python3 tools/check.py`), run in CI on every push.

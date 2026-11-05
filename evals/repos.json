@@ -1,9 +1,11 @@
 {
   "typewirets": {
+    "path": "../typewirets",
     "url": "https://github.com/typewirets/typewirets.git",
     "commit": "d8f6a73d5859f0fb294e427fa538822552292114"
   },
   "typewirepy": {
+    "path": "../typewirepy",
     "url": "https://github.com/typewirepy/typewirepy.git",
     "commit": "658c4e5595d25070a1de1f496d2228e571d453f6"
   }

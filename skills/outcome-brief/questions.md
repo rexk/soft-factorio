@@ -40,8 +40,9 @@ your recommended answer.
   the evidence for each, then your recommendation.
 - When they name an approach, thank them and carry it to the design brief,
   where it is weighed against alternatives.
-- When they say "just guess" or "you decide", make a concrete proposal, then
-  record it as your call.
+- When they say "just guess" or "you decide", make a concrete proposal and
+  record it in the brief as your call. That hands you the decision, not the
+  approval: the brief still goes to them before anything is built.
 - If the framing seems off, restate it: "It sounds like what you're really
   after is X. Does that capture it better?"
 - Stop once the outcome brief can be filled without guessing. More questions

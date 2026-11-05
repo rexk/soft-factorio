@@ -7,8 +7,9 @@ Local rules above and below this block win over it.
 
 - **Check intent before building.** When an ask is vague or would change what
   gets built, use `outcome-brief`: agree a product brief (value and behaviour)
-  before touching code. Small, clear asks: say the outcome in two lines, then
-  work.
+  before touching code. Answers to your questions, or "you decide", aren't
+  approval; a yes to the brief is. Small, clear asks: say the outcome in two
+  lines, then work.
 - **Prompt for outcomes.** When you hand work to another agent, state the
   value and the finish line, not the steps (`guides/prompting-for-outcomes.md`).
 - **Report in pages.** Results, reviews and questions with structure go in an

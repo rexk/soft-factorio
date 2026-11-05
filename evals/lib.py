@@ -49,18 +49,24 @@ def workdir() -> Path:
 def snapshot(name: str, dest: Path) -> Path:
     """Copy a repository at its pinned commit into dest, cut off from any remote.
 
+    The source is the local copy at the spec's `path` (relative to the
+    factory) when it exists, else a cached clone of its `url`.
+
     Snapshots are never pushed: the origin remote is removed and a pre-push
     hook refuses every push.
     """
     spec = REPOS[name]
-    cache = workdir() / "cache" / f"{name}@{spec['commit'][:12]}"
-    if not cache.exists():
-        cache.parent.mkdir(parents=True, exist_ok=True)
-        sh(["git", "clone", "--quiet", spec["url"], str(cache)])
-        git(cache, "checkout", "--quiet", spec["commit"])
+    local = (FACTORY / spec["path"]).resolve() if spec.get("path") else None
+    if local and (local / ".git").exists():
+        source = local  # a local copy next to the factory; only read, never written
+    else:
+        source = workdir() / "cache" / f"{name}@{spec['commit'][:12]}"
+        if not source.exists():
+            source.parent.mkdir(parents=True, exist_ok=True)
+            sh(["git", "clone", "--quiet", spec["url"], str(source)])
     if dest.exists():
         shutil.rmtree(dest)
-    sh(["git", "clone", "--quiet", "--no-hardlinks", str(cache), str(dest)])
+    sh(["git", "clone", "--quiet", "--no-hardlinks", str(source), str(dest)])
     git(dest, "checkout", "--quiet", "-B", "main", spec["commit"])
     git(dest, "remote", "remove", "origin")
     hook = dest / ".git" / "hooks" / "pre-push"
@@ -68,6 +74,18 @@ def snapshot(name: str, dest: Path) -> Path:
     hook.chmod(0o755)
     git(dest, "config", "user.name", "eval-runner")
     git(dest, "config", "user.email", "eval-runner@invalid")
+    return dest
+
+
+def empty_repo(dest: Path) -> Path:
+    """A new repository with one empty commit and no remote."""
+    if dest.exists():
+        shutil.rmtree(dest)
+    dest.mkdir(parents=True)
+    git(dest, "init", "--quiet", "-b", "main")
+    git(dest, "config", "user.name", "eval-runner")
+    git(dest, "config", "user.email", "eval-runner@invalid")
+    git(dest, "commit", "--quiet", "--allow-empty", "-m", "Initial commit")
     return dest
 
 
@@ -109,8 +127,13 @@ class AgentRun:
 
 
 def run_agent(repo: Path, prompt: str, log: Path, model: str, budget_usd: float = 5.0,
-              timeout_s: int = 1800, extra_tools: list[str] | None = None) -> AgentRun:
-    """One headless agent session in repo. The transcript goes to log."""
+              timeout_s: int = 1800, extra_tools: list[str] | None = None,
+              session: str | None = None, resume: bool = False) -> AgentRun:
+    """One headless agent turn in repo. The transcript goes to log.
+
+    For a conversation, pass the same session id each turn, with resume=True
+    from the second turn on. Without a session id nothing is persisted.
+    """
     cmd = [
         "claude", "-p", prompt,
         "--model", model,
@@ -120,8 +143,11 @@ def run_agent(repo: Path, prompt: str, log: Path, model: str, budget_usd: float 
         "--allowedTools", *(READ_ONLY_BASH + ["Skill"] + (extra_tools or [])),
         "--output-format", "stream-json", "--verbose",
         "--max-budget-usd", str(budget_usd),
-        "--no-session-persistence",
     ]
+    if session:
+        cmd += ["--resume", session] if resume else ["--session-id", session]
+    else:
+        cmd.append("--no-session-persistence")
     log.parent.mkdir(parents=True, exist_ok=True)
     with log.open("w") as fh:
         try:

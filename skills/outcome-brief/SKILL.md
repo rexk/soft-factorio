@@ -58,6 +58,11 @@ layouts has started designing too early.
    they said as theirs, and anything you filled in as **your proposal, with
    your reason**. Ask what's wrong or missing. *Done when* they confirm, or
    their corrections are folded in.
+   - **They leave it to you** ("you decide", "your call", "whatever you
+     think"): take your recommendations, then go straight to step 5. Write
+     the brief with those choices marked as your calls, and let the brief
+     itself be the playback. They have handed you the decisions, not the
+     approval.
 5. **Write the product brief** as an html-for-humans page, using the sections
    and stable IDs in [brief-sections.md](brief-sections.md). It has two parts
    only:
@@ -83,10 +88,17 @@ layouts has started designing too early.
 
    Without a way to start a fresh agent, reread the brief as a stranger would.
    *Done when* the "theirs" list is answered and the brief is updated.
-7. **Approval gate.** Hand over the product brief and ask for approval. Nothing
-   gets built before approval: no product code, scaffolding or dependency
-   installs. Reading and small throwaway spikes they agree to are fine.
-   *Done when* they approve, or say to skip the brief.
+7. **Approval gate.** Hand over the product brief and ask for approval, then
+   stop: end your turn. Nothing gets built before approval: no product code,
+   scaffolding or dependency installs. Reading and small throwaway spikes
+   they agree to are fine.
+   - **Approval** is a yes to the brief they have seen ("approved", "looks
+     good, build it"), or an explicit "skip the brief, just build it".
+   - **Not approval:** answers to your questions, "you decide", "go with your
+     picks", or any reply given before they have seen the brief. Fold those
+     into the brief and ask again.
+
+   *Done when* they approve the brief they have seen, or tell you to skip it.
 8. **Draft the design brief** as a second html-for-humans page:
    - **Named approaches first**: each approach the person named, weighed
      against 1–2 alternatives with evidence. Keep what was rejected and why.

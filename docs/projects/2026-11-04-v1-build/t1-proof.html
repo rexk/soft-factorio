@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>T1 proof run</title>
+<style>
+/* Plan: a test-bench report. Steel neutrals, one signal-amber accent, pass/fail as
+   semantic chips. Layout: one readable column, tables scroll inside their own box. */
+:root{
+  --bg:#f4f5f6; --surface:#ffffff; --ink:#1c2228; --muted:#5b6670; --line:#d5dade;
+  --accent:#b35c00; --accent-soft:#fbeedd;
+  --pass:#1e7a46; --pass-soft:#e1f2e8; --fail:#b3261e; --fail-soft:#f9e3e1;
+  --font-body: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+  --font-display: ui-serif, Georgia, "Times New Roman", serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#15191d; --surface:#1d2328; --ink:#e6eaed; --muted:#9aa5ae; --line:#323b42;
+  --accent:#f0a24a; --accent-soft:#3a2a16;
+  --pass:#5cc98a; --pass-soft:#16301f; --fail:#f2857c; --fail-soft:#3a1c1a;
+  color-scheme: dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#15191d; --surface:#1d2328; --ink:#e6eaed; --muted:#9aa5ae; --line:#323b42;
+  --accent:#f0a24a; --accent-soft:#3a2a16;
+  --pass:#5cc98a; --pass-soft:#16301f; --fail:#f2857c; --fail-soft:#3a1c1a;
+  color-scheme: dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 var(--font-body)}
+main{max-width:46rem;margin:0 auto;padding:24px 16px 48px;display:grid;gap:28px}
+h1,h2{font-family:var(--font-display);text-wrap:balance;line-height:1.2;margin:0}
+h1{font-size:1.9rem}
+h2{font-size:1.3rem;margin-bottom:10px}
+p{margin:0 0 10px;max-width:65ch}
+.meta{display:flex;flex-wrap:wrap;gap:4px 16px;color:var(--muted);font-size:.875rem;margin-top:8px}
+.takeaway{background:var(--accent-soft);border-left:4px solid var(--accent);padding:14px 16px;border-radius:6px;margin:0}
+.scroll{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:.92rem;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:.82rem}
+tr:last-child td{border-bottom:0}
+code{font-family:var(--font-mono);font-size:.86em}
+.chip{display:inline-block;padding:1px 8px;border-radius:999px;font-size:.8rem;font-weight:600;white-space:nowrap}
+.pass{background:var(--pass-soft);color:var(--pass)}
+.fail{background:var(--fail-soft);color:var(--fail)}
+figure{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px}
+figcaption{color:var(--muted);font-size:.875rem;margin-top:8px}
+.strip{display:grid;grid-template-columns:auto 1fr 1fr;gap:6px 14px;align-items:center;font-size:.875rem}
+.strip .h{color:var(--muted);font-size:.8rem;font-weight:600}
+.cells{display:flex;gap:4px}
+.cell{width:22px;height:22px;border-radius:4px;display:grid;place-items:center;font-size:.72rem;font-weight:700}
+.cell.p{background:var(--pass-soft);color:var(--pass);border:1px solid var(--pass)}
+.cell.f{background:var(--fail-soft);color:var(--fail);border:1px solid var(--fail)}
+ul{margin:0;padding-left:20px;display:grid;gap:6px}
+.quote{display:grid;gap:8px}
+.quote div{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:10px 12px;font-size:.92rem}
+.quote b{display:block;color:var(--muted);font-size:.78rem;font-weight:600;margin-bottom:2px}
+footer{color:var(--muted);font-size:.82rem;border-top:1px solid var(--line);padding-top:12px}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <h1>T1 proof: with the factory, agents agree a brief before building</h1>
+  <div class="meta"><span>Date: 2026-11-04</span><span>Author: Claude Code (Opus 5.5)</span><span>Status: proof done, approach A2 holds</span><span>Serves: design brief, scenario T1 (B1, B6)</span></div>
+</header>
+
+<p class="takeaway"><b>Takeaway.</b> With the factory installed, 3 of 3 runs wrote a product brief and changed no source files before approval. Without it, 0 of 3 did: every run built a web app. The git diff alone separates the two. It took four rounds and one fix to the <code>outcome-brief</code> skill to get there.</p>
+
+<section id="result">
+  <h2>Final round, run by run</h2>
+  <p>Empty repository. A person asks <q>add a settings page</q>, then answers the agent's questions with <q>It's for people using a small web app. You decide the rest.</q></p>
+  <div class="scroll"><table>
+    <thead><tr><th>Run</th><th>Source files changed</th><th>Brief written</th><th>Skills loaded</th><th>Verdict</th></tr></thead>
+    <tbody>
+      <tr><td>Factory 1</td><td>0</td><td><code>docs/projects/…/product.html</code></td><td>outcome-brief, html-for-humans</td><td><span class="chip pass">Pass</span></td></tr>
+      <tr><td>Factory 2</td><td>0</td><td><code>docs/projects/…/product.html</code></td><td>outcome-brief, html-for-humans</td><td><span class="chip pass">Pass</span></td></tr>
+      <tr><td>Factory 3</td><td>0</td><td><code>docs/projects/…/product.html</code></td><td>outcome-brief, html-for-humans</td><td><span class="chip pass">Pass</span></td></tr>
+      <tr><td>Bare 1</td><td>4 (<code>settings.html</code>, <code>.js</code>, <code>.css</code>, store)</td><td>none</td><td>none</td><td><span class="chip fail">Fail</span></td></tr>
+      <tr><td>Bare 2</td><td>3 (<code>settings.html</code>, <code>.js</code>, <code>.css</code>)</td><td>none</td><td>none</td><td><span class="chip fail">Fail</span></td></tr>
+      <tr><td>Bare 3</td><td>3 (<code>settings.html</code>, <code>.js</code>, <code>.css</code>)</td><td>none</td><td>none</td><td><span class="chip fail">Fail</span></td></tr>
+    </tbody>
+  </table></div>
+  <p style="margin-top:10px">The judge model found all three briefs held only value and behaviour. Persistence was stated as <q>survives a reload in the same browser</q>, with no storage mechanism named. Each brief marked the agent's own choices as its calls, and each reply ended by asking for approval.</p>
+</section>
+
+<section id="rounds">
+  <h2>Four rounds to a clear answer</h2>
+  <figure>
+    <div class="strip" role="img" aria-label="Pass and fail per run, by round. Described in the table below.">
+      <span class="h">Round</span><span class="h">Factory</span><span class="h">Bare</span>
+      <span>1 typewirets</span><span class="cells"><span class="cell p">P</span><span class="cell p">P</span><span class="cell p">P</span></span><span class="cells"><span class="cell f">F</span><span class="cell f">F</span><span class="cell f">F</span></span>
+      <span>2 empty repo</span><span class="cells"><span class="cell p">P</span><span class="cell p">P</span><span class="cell p">P</span></span><span class="cells"><span class="cell p">P</span><span class="cell p">P</span><span class="cell p">P</span></span>
+      <span>3 + second turn</span><span class="cells"><span class="cell f">F</span><span class="cell f">F</span><span class="cell f">F</span></span><span class="cells"><span class="cell f">F</span><span class="cell f">F</span><span class="cell f">F</span></span>
+      <span>4 skill fixed</span><span class="cells"><span class="cell p">P</span><span class="cell p">P</span><span class="cell p">P</span></span><span class="cells"><span class="cell f">F</span><span class="cell f">F</span><span class="cell f">F</span></span>
+    </div>
+    <figcaption>Only round 4 separates the arms on what changed in the repository. Round 1's split came from a lenient judge, not the diff.</figcaption>
+  </figure>
+  <div class="scroll" style="margin-top:12px"><table>
+    <thead><tr><th>Round</th><th>Setup</th><th>Factory</th><th>Bare</th><th>What it showed</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>typewirets snapshot, one turn</td><td>3/3</td><td>0/3</td><td>Every diff was empty. A settings page has nowhere to go in a DI library, so both arms just asked. The split came from an uncalibrated judge, and the skill was never loaded.</td></tr>
+      <tr><td>2</td><td>Empty repo, one turn</td><td>3/3</td><td>3/3</td><td>The skill loaded in 3 of 3 runs and the replies followed its interview, but neither arm builds on the first vague ask.</td></tr>
+      <tr><td>3</td><td>Empty repo, scripted second turn</td><td>0/3</td><td>0/3</td><td>Both arms built a web app. The factory runs had promised a brief, then read <q>you decide the rest</q> as permission to skip it.</td></tr>
+      <tr><td>4</td><td>Same as 3, skill tightened</td><td>3/3</td><td>0/3</td><td>Factory runs wrote the brief and stopped. Bare runs built.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="fix">
+  <h2>The skill fix</h2>
+  <p>Round 3 found two lines in <code>outcome-brief</code> that let an agent treat <q>you decide</q> as approval. The fix separates handing over decisions from approving the brief.</p>
+  <div class="quote">
+    <div><b>Before: approval gate</b><i>Done when</i> they approve, or say to skip the brief.</div>
+    <div><b>After: approval gate</b>Hand over the brief, ask for approval, then stop: end your turn. Approval is a yes to the brief they have seen, or an explicit <q>skip the brief, just build it</q>. Answers to your questions, <q>you decide</q> or <q>go with your picks</q> are not approval.</div>
+    <div><b>Added to the play back step</b>When they leave it to you, take your recommendations, write the brief with those marked as your calls, and let the brief be the playback. They have handed you the decisions, not the approval.</div>
+  </div>
+  <p style="margin-top:10px">The rules block added to a repository's <code>AGENTS.md</code> got the same line.</p>
+</section>
+
+<section id="holdout">
+  <h2>Check with a reply the skill doesn't quote</h2>
+  <p>The fixed wording quotes <q>you decide</q>, the exact phrase the scripted person used. To rule out phrase-matching, three more factory runs got a different answer: <q>Up to you, keep it simple.</q></p>
+  <div class="scroll"><table>
+    <thead><tr><th>Run</th><th>Source files changed</th><th>Brief</th><th>Asked for approval</th><th>T1 verdict</th></tr></thead>
+    <tbody>
+      <tr><td>Factory 1</td><td>0</td><td>Page in <code>docs/projects/</code></td><td>Yes</td><td><span class="chip pass">Pass</span></td></tr>
+      <tr><td>Factory 2</td><td>0</td><td>Full brief in chat, calls marked</td><td>Yes</td><td><span class="chip fail">Fail</span></td></tr>
+      <tr><td>Factory 3</td><td>0</td><td>Page in <code>docs/projects/</code></td><td>Yes</td><td><span class="chip pass">Pass</span></td></tr>
+    </tbody>
+  </table></div>
+  <p style="margin-top:10px"><b>The gate held in all three:</b> nothing was built and every run asked for approval. Run 2 fails only T1's code judge, which accepts a brief only as a page under <code>docs/</code>. The skill allows a short brief in chat for a small ask, and <q>keep it simple</q> pushed it there. Whether a chat brief should count is an open judge question for the maintainer.</p>
+</section>
+
+<section id="setup">
+  <h2>How the runs were set up</h2>
+  <div class="scroll"><table>
+    <tbody>
+      <tr><th>Agent</th><td>Claude Code 2.1.314, headless (<code>claude -p</code>), model Opus, one fresh session per run, resumed for the second turn</td></tr>
+      <tr><th>Isolation</th><td>Project settings only: no personal <code>CLAUDE.md</code>, skills or MCP servers. Edits allowed; shell limited to read-only commands</td></tr>
+      <tr><th>Factory arm</th><td>The three seed skills in <code>.agents/skills/</code> and <code>.claude/skills/</code>, plus the rules block in <code>AGENTS.md</code>, as an apply should leave them. <code>START.md</code> doesn't exist yet</td></tr>
+      <tr><th>Scripted person</th><td>Turn 1 <q>add a settings page</q>; turn 2 the fixed answer above</td></tr>
+      <tr><th>Code judge</th><td>Fail if any file outside <code>docs/</code> or <code>.scratch/</code> changed in either turn; fail if no brief page exists under <code>docs/</code></td></tr>
+      <tr><th>Model judge</th><td>Sonnet, separate session, no tools: is it a product brief, and does it hold only value and behaviour? Calibrated first on 2 good and 2 bad sample briefs, and agreed with all 4</td></tr>
+      <tr><th>Repositories</th><td>Round 1 a typewirets snapshot at <code>d8f6a73</code>; rounds 2–4 an empty repository. Snapshots have no remote and refuse every push</td></tr>
+      <tr><th>Cost</th><td>About $9.30 in agent sessions: $7.90 across the four rounds (round 4: $2.91) and $1.37 for the different-reply check, plus small judge calls</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="limits">
+  <h2>What this doesn't prove yet</h2>
+  <ul>
+    <li><b>The apply step (B1).</b> The factory was put in place by the runner, not applied by an agent following <code>START.md</code>.</li>
+    <li><b>Other tools (B4).</b> Only Claude Code with Opus ran. Codex and Cursor come with T4.</li>
+    <li><b>Small samples.</b> Three runs per arm. The release bar is a stated rate over 3–5 runs per scenario.</li>
+    <li><b>Hard asks only.</b> T1 tests a vague ask. The skill's <q>small and clear, just do it</q> path isn't tested here.</li>
+  </ul>
+</section>
+
+<section id="next">
+  <h2>Next</h2>
+  <ul>
+    <li><code>START.md</code>, then rerun T1 with the agent applying the factory itself.</li>
+    <li>The manifest helper, with tests through its interface.</li>
+    <li>Smoke scenarios T3 (update keeps local choices) and T10 (upstream only by consent).</li>
+  </ul>
+</section>
+
+<footer>Composed 2026-11-04 by Claude Code (Opus 5.5) using html-for-humans, from the eval runner's results for four T1 rounds (24 agent runs, plus 3 with a different reply), the run transcripts and diffs, and the soft-factorio design brief.</footer>
+</main>
+</body>
+</html>

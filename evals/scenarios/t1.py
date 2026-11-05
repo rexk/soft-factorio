@@ -1,9 +1,12 @@
 """T1 Apply, then work (B1, B6).
 
-The person gives a fresh session a vague ask, "add a settings page".
-Pass when the session starts a product brief and changes no source files
-before approval. A judge model checks that any brief written holds value and
-behaviour only.
+In an empty repository, the person gives a fresh session a vague ask,
+"add a settings page", then answers its questions with a fixed reply that
+leaves the details to the agent (a scripted person).
+
+Pass when, after the answer, a product brief exists under docs/ and no source
+file changed in either turn. A judge model, calibrated on the samples in
+evals/calibration/t1/, checks the brief holds value and behaviour only.
 
 Arms:
   bare          the repository as it is, no factory
@@ -13,78 +16,93 @@ Arms:
 
 from __future__ import annotations
 
+import uuid
 from pathlib import Path
 
 import lib
 
 ID = "T1"
 BEHAVIOURS = ["B1", "B6"]
-REPO = "typewirets"
+REPO = None  # an empty repository, as the design brief specifies
 TASK = "add a settings page"
+ANSWER = "It's for people using a small web app. You decide the rest."
 APPLY = ("Apply the software factory to this repository, following "
          "{factory}/START.md. Answers to its questions: contribute lessons "
          "upstream: no.")
 
 SKILLS = ["outcome-brief", "html-for-humans", "create-pr"]
 
-RUBRIC = """You judge one run of a coding agent. A person typed only this vague
-ask into a fresh session in a TypeScript library repository: "add a settings
-page". Nobody answered any follow-up. Below are the agent's final reply, the
-list of files it changed, and the text of any HTML or Markdown page it wrote.
+RUBRIC = """You judge a product brief a coding agent wrote. A product brief
+states only the value (who benefits, and why) and the behaviour (what people
+can do or see once it exists). It names no tools, frameworks, libraries,
+storage mechanisms, file layouts or implementation steps; those belong in a
+separate design brief. Behaviour may say what persists or where it is
+visible ("choices survive a reload on the same device") but not how
+("saved in localStorage").
 
 Decide:
-- started_brief: true if the agent began agreeing intent before building:
-  it wrote a product brief (the value and the behaviour wanted), or its reply
-  asks the person about the value (who it is for, why) or the behaviour (what
-  people can do or see) of the ask. A reply that only asks a technical
-  question (which framework, which file) is false. Building the feature is
-  false.
-- value_behaviour_only: if it wrote a product brief, true when the brief
-  holds only value and behaviour, with no tools, file layouts, frameworks or
-  implementation steps; false if it has those. null if it wrote no brief.
-- reason: one sentence.
+- is_product_brief: true if the material is a product brief at all (it
+  states value and behaviour for something to be built), false if it is a
+  build plan, a design document or something else.
+- value_behaviour_only: true if it holds only value and behaviour, false if
+  any line names a tool, framework, library, storage mechanism, file layout
+  or implementation step.
+- reason: one sentence; if false, quote the offending phrase.
 
-JSON keys: started_brief, value_behaviour_only, reason."""
+JSON keys: is_product_brief, value_behaviour_only, reason."""
 
 
 def is_source(path: str) -> bool:
-    """Source files: anything that isn't a document page (briefs, notes)."""
-    return not (path.startswith("docs/") or path.endswith((".md", ".html")))
+    """Anything outside docs/ (briefs) and .scratch/ (throwaway pages) is building."""
+    return not path.startswith(("docs/", ".scratch/"))
+
+
+def judge_brief(pages: dict[str, str]) -> dict:
+    material = "".join(f"\n\nPAGE {p}:\n{text[:30000]}" for p, text in pages.items())
+    return lib.model_judge(RUBRIC, material)
+
+
+def judge_accepts(page: str) -> bool:
+    """Calibration hook: would the judge pass this page as T1's brief?"""
+    v = judge_brief({"docs/brief.html": page})
+    return v.get("is_product_brief") is True and v.get("value_behaviour_only") is True
 
 
 def run(dest: Path, arm: str, logdir: Path, model: str) -> dict:
-    repo = lib.snapshot(REPO, dest)
+    repo = lib.snapshot(REPO, dest) if REPO else lib.empty_repo(dest)
     if arm == "preinstalled":
         lib.preinstall_factory(repo, SKILLS)
         lib.commit_all(repo, "Apply software factory (preinstalled by eval)")
     elif arm == "apply":
-        applied = lib.run_agent(repo, APPLY.format(factory=lib.FACTORY), logdir / "apply.jsonl",
-                                model, extra_tools=[f"Read({lib.FACTORY}/**)"])
+        lib.run_agent(repo, APPLY.format(factory=lib.FACTORY), logdir / "apply.jsonl",
+                      model, extra_tools=[f"Read({lib.FACTORY}/**)"])
         lib.commit_all(repo, "Apply software factory (by agent)")
     base = lib.git(repo, "rev-parse", "HEAD").strip()
 
-    agent = lib.run_agent(repo, TASK, logdir / "task.jsonl", model)
-    ev = lib.collect(repo, base, agent)
-    (logdir / "diff.patch").write_text(ev.diff)
+    session = str(uuid.uuid4())
+    first = lib.run_agent(repo, TASK, logdir / "turn1.jsonl", model, session=session)
+    ev1 = lib.collect(repo, base, first)
+    second = lib.run_agent(repo, ANSWER, logdir / "turn2.jsonl", model,
+                           session=session, resume=True)
+    ev2 = lib.collect(repo, base, second)
+    (logdir / "diff.patch").write_text(ev2.diff)
 
-    source = [p for p in ev.paths() if is_source(p)]
-    pages = [p for p in ev.paths() if p.endswith((".html", ".md")) and (repo / p).exists()]
-    material = (
-        f"FINAL REPLY:\n{ev.final_reply}\n\nCHANGED FILES:\n"
-        + "\n".join(f"{s} {p}" for s, p in ev.changed)
-        + "".join(f"\n\nPAGE {p}:\n{(repo / p).read_text()[:20000]}" for p in pages)
-    )
-    verdict = lib.model_judge(RUBRIC, material)
-    passed = (not source and verdict.get("started_brief") is True
-              and verdict.get("value_behaviour_only") is not False)
+    source = sorted({p for p in ev1.paths() + ev2.paths() if is_source(p)})
+    pages = {p: (repo / p).read_text() for p in ev2.paths()
+             if p.startswith("docs/") and p.endswith((".html", ".md")) and (repo / p).exists()}
+    verdict = judge_brief(pages) if pages else None
+    passed = (not source and bool(pages) and verdict is not None
+              and verdict.get("is_product_brief") is True
+              and verdict.get("value_behaviour_only") is True)
     return {
         "pass": passed,
         "source_files_changed": source,
-        "pages_written": pages,
+        "brief_pages": sorted(pages),
         "judge": verdict,
-        "skills_used": agent.skills_used,
-        "cost_usd": round(agent.cost_usd, 3),
-        "turns": agent.turns,
-        "agent_error": agent.is_error,
-        "final_reply": ev.final_reply[:3000],
+        "skills_used": first.skills_used + second.skills_used,
+        "cost_usd": round(first.cost_usd + second.cost_usd, 3),
+        "turns": first.turns + second.turns,
+        "agent_error": first.is_error or second.is_error,
+        "reply_1": ev1.final_reply[:3000],
+        "reply_2": ev2.final_reply[:3000],
     }
