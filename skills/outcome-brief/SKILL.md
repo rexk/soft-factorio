@@ -133,7 +133,11 @@ layouts has started designing too early.
 
 Briefs are durable: commit them in the project's folder. The repo's AGENTS.md
 can set the place with a `projects` setting; without one, use
-`docs/projects/YYYY-MM-DD-<slug>/`. A project folder holds `product.html`,
+`docs/projects/YYYY-MM-DD-<slug>/`. The slug is the project's key, so it
+must be new: check that no folder there already ends in `-<slug>`, and pick
+another if one does. Items are cited from outside as `<slug>-<ID>`
+(`settings-page-B3`; see [brief-sections.md](brief-sections.md)). A project
+folder holds `product.html`,
 `design.html` and a `README.md` state file (where things stand, open
 questions, next steps), so any fresh session can resume from files alone.
 Each brief is HTML only, with no Markdown twin, and readable by both people

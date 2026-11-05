@@ -1,5 +1,7 @@
 # v1 build
 
+Key: `v1-build`
+
 Building v1 of the factory: approach A2 (start file, copied skills, a
 manifest, scenario evals). The product and design briefs are kept outside
 this repository; the behaviour lines (B1–B14) and scenarios (T1–T12) they
@@ -58,10 +60,13 @@ Known limits:
 - A headless browser for T6's render check; Codex outside its sandbox for
   the apply arms.
 
-- **Project folder naming.** The maintainer flagged that this folder's name
-  (`2026-11-04-v1-build`) doesn't follow the pattern we established. To
-  settle together before the next project folder is made; nothing renamed
-  yet.
+## Decided
+
+- **Project keys (2026-11-05).** A project's slug is its key and must be new
+  in the projects folder. Items are cited from outside like issue keys,
+  `<slug>-<ID>` (`v1-build-B3`), with the repository first from another
+  repo. Requirements stay in the product brief as written; there is no
+  separate list. To revisit if slugs stop being enough.
 
 ## Next
 

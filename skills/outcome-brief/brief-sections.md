@@ -6,6 +6,13 @@ goes in each page**. Every item carries a stable ID, shown as visible text and
 used as its anchor `id`, so builders, tests and reviews can cite it (`B2`,
 `A1`).
 
+**Citing from outside the project.** The project's slug (the folder name
+without its date) is its key. Outside the project, cite an item as
+`<slug>-<ID>`, like an issue key: `settings-page-B3`, `settings-page-Q2`.
+From another repository, put the repository first:
+`<repository>/settings-page-B3`. Show the key in each brief's metadata
+(`Key: settings-page`), so a search for the reference finds the brief.
+
 ## Product brief: value and behaviour, nothing about how
 
 | Section | ID | Content |
