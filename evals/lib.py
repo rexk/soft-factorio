@@ -13,6 +13,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import threading
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -30,7 +31,10 @@ SHIP_TOOLS = [
     "Bash(git checkout:*)", "Bash(git switch:*)", "Bash(git branch:*)",
     "Bash(git add:*)", "Bash(git commit:*)", "Bash(git push:*)", "Bash(git fetch:*)",
     "Bash(git remote:*)", "Bash(git rev-parse:*)", "Bash(git merge-base:*)",
-    "Bash(gh:*)",
+    "Bash(gh:*)", "Bash(git -C:*)",
+    # Running the repository's own checks, which a person would approve.
+    "Bash(uv run:*)", "Bash(pytest:*)", "Bash(python -m pytest:*)",
+    "Bash(python3 -m pytest:*)", "Bash(pnpm:*)", "Bash(npx tsc:*)", "Bash(npx vitest:*)",
 ]
 
 READ_ONLY_BASH = [
@@ -183,7 +187,81 @@ class AgentRun:
     skills_used: list[str] = field(default_factory=list)
 
 
-def run_agent(repo: Path, prompt: str, log: Path, model: str, budget_usd: float = 5.0,
+_tool = threading.local()
+
+
+def use_tool(name: str) -> None:
+    """Pick the agent tool for this thread's runs: "claude" (default) or "codex"."""
+    _tool.name = name
+
+
+def run_agent(repo: Path, prompt: str, log: Path, model: str, budget_usd: float = 5.0, **kw) -> "AgentRun":
+    if getattr(_tool, "name", "claude") == "codex":
+        return run_codex(repo, prompt, log, **kw)
+    return run_claude(repo, prompt, log, model, budget_usd, **kw)
+
+
+def codex_home() -> Path:
+    """A Codex home for evals: the user's login (a symlink), none of their instructions."""
+    home = workdir() / "codex-home"
+    home.mkdir(parents=True, exist_ok=True)
+    auth = home / "auth.json"
+    if not auth.exists():
+        auth.symlink_to(Path.home() / ".codex" / "auth.json")
+    real = Path.home() / ".codex" / "config.toml"
+    model = next((l for l in real.read_text().splitlines() if l.startswith("model ")), "") \
+        if real.exists() else ""
+    (home / "config.toml").write_text(model + "\n")
+    return home
+
+
+_codex_threads: dict[str, str] = {}
+
+
+def run_codex(repo: Path, prompt: str, log: Path, timeout_s: int = 1800,
+              extra_tools: list[str] | None = None, session: str | None = None,
+              resume: bool = False, add_dirs: list[str] | None = None,
+              fake_gh_log: Path | None = None) -> "AgentRun":
+    """One headless Codex turn in repo, sandboxed to the repository (no network)."""
+    last = log.with_suffix(".last.txt")
+    opts = ["--json", "-o", str(last), "--skip-git-repo-check",
+            "-c", 'approval_policy="never"', "-c", 'sandbox_mode="workspace-write"',
+            "-c", 'shell_environment_policy.inherit="all"']
+    for d in add_dirs or []:
+        opts += ["--add-dir", d]
+    if session and resume and session in _codex_threads:
+        cmd = ["codex", "exec", "resume", _codex_threads[session], *opts, prompt]
+    else:
+        cmd = ["codex", "exec", *opts, "-C", str(repo), prompt]
+    env = dict(os.environ, CODEX_HOME=str(codex_home()))
+    if fake_gh_log:
+        env["PATH"] = f"{FAKES}{os.pathsep}{env.get('PATH', '')}"
+        env["FAKE_GH_LOG"] = str(fake_gh_log)
+        origin = git(repo, "remote", "get-url", "origin", check=False).strip()
+        if origin.startswith(str(workdir())):
+            env["FAKE_GIT_REMOTE"] = origin
+    log.parent.mkdir(parents=True, exist_ok=True)
+    with log.open("w") as fh:
+        try:
+            subprocess.run(cmd, cwd=repo, stdout=fh, stderr=subprocess.STDOUT, env=env,
+                           stdin=subprocess.DEVNULL, timeout=timeout_s, text=True)
+        except subprocess.TimeoutExpired:
+            pass
+    error = True
+    for line in log.read_text().splitlines():
+        try:
+            ev = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if ev.get("type") == "thread.started" and session:
+            _codex_threads.setdefault(session, ev["thread_id"])
+        if ev.get("type") == "turn.completed":
+            error = False
+    result = last.read_text() if last.exists() else ""
+    return AgentRun(result, 0.0, 1, error)
+
+
+def run_claude(repo: Path, prompt: str, log: Path, model: str, budget_usd: float = 5.0,
               timeout_s: int = 1800, extra_tools: list[str] | None = None,
               session: str | None = None, resume: bool = False,
               add_dirs: list[str] | None = None, fake_gh_log: Path | None = None) -> AgentRun:

@@ -59,7 +59,7 @@ def main() -> int:
     if args.calibrate:
         return calibrate(args.scenarios)
 
-    stamp = time.strftime("%Y%m%d-%H%M%S")
+    stamp = time.strftime("%Y%m%d-%H%M%S") + "-" + "-".join(args.scenarios)
     out = lib.workdir() / "results" / stamp
     jobs = []
     for sid in args.scenarios:

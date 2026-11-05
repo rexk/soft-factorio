@@ -1,6 +1,6 @@
 ---
 name: contribute-upstream
-description: Offer to send a lesson this repository learned back to the software factory, as one GitHub issue, asking the person before each one. Use when a retro produces a lesson that would hold in any repository (about how agents work, not about this code), or when the person asks to send feedback or a lesson to the factory. Installed only in repositories that opted in.
+description: Offer to send a lesson this repository learned back to the software factory, as one GitHub issue, asking the person before each one. Use every time a lesson would hold in any repository (about how agents work, not about this code): after a retro, and for each later lesson in the same session, in the reply that records it. Also when the person asks to send feedback or a lesson to the factory. Installed only in repositories that opted in.
 ---
 
 # contribute-upstream: one lesson, one issue, only with a yes

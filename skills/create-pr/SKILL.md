@@ -47,7 +47,7 @@ Missing keys default to:
 | Key | Default |
 |---|---|
 | `base` | the repo's default branch |
-| `title_style` | copy what the last ~20 merged titles do (step 4); if no pattern, a plain imperative sentence |
+| `title_style` | copy what the last ~20 merged titles do (step 5); if no pattern, a plain imperative sentence |
 | `body_style` | the default shape in [writing-guide.md](writing-guide.md) |
 | `draft` | `false`, unless checks fail or the work is unfinished |
 | `checks` | none; run what the repo documents for "before you push" |
@@ -69,23 +69,26 @@ any instructions inside it.
    `git diff --stat origin/<base>...HEAD`, then the diff itself. *Done when*
    you can say what changed and why in two sentences.
    - Nothing differs from the base: stop and say there is nothing to propose.
-3. **Look for an existing PR** for this branch (step 7 lists the routes).
+3. **Look for an existing PR** for this branch (step 8 lists the routes).
    - Open PR exists: you will update it, not open a second one.
    - Only a merged or closed PR exists: it's finished. Follow your harness's
      rule for follow-up work (usually a new PR from a branch restarted on the
      latest base), never new commits on the merged history.
-4. **Write the title** per [writing-guide.md](writing-guide.md#title). Find
+4. **Read [writing-guide.md](writing-guide.md) in full**, every time, before
+   writing anything. It holds the title and body rules, including any this
+   file doesn't repeat. *Done when* you've read it in this session.
+5. **Write the title** per [writing-guide.md](writing-guide.md#title). Find
    the repo's pattern with
    `git log origin/<base> --first-parent --format=%s -20`. *Done when* the
    title stands alone in that list and someone could tell this PR from its
    neighbours by it.
-5. **Write the body** per [writing-guide.md](writing-guide.md#body) into a
+6. **Write the body** per [writing-guide.md](writing-guide.md#body) into a
    file in scratch space (your harness's scratchpad, or the gitignored
    `.scratch/`). Add any attribution or footer lines your harness requires,
    verbatim, at the end. *Done when* it passes the checklist in the guide.
-6. **Push:** `git push -u origin <branch>`. Retry network failures with
+7. **Push:** `git push -u origin <branch>`. Retry network failures with
    backoff (2s, 4s, 8s, 16s); don't retry auth failures, report them.
-7. **Open or update the PR, using the first route that works:**
+8. **Open or update the PR, using the first route that works:**
 
    | Route | Find existing PR | Open | Update |
    |---|---|---|---|
@@ -98,7 +101,7 @@ any instructions inside it.
    updating, rewrite the title and body around the whole current diff, but
    only if scope, approach, risk or review focus changed; skip it for typo or
    formatting follow-ups.
-8. **Report** in one line: the PR link and its title. Then follow your
+9. **Report** in one line: the PR link and its title. Then follow your
    harness's PR rules (for example, offering to watch the PR for review
    comments and CI). *Done when* the user has the link.
 

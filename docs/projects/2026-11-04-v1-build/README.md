@@ -11,10 +11,35 @@ define are mirrored in `evals/`.
 |---|---|
 | Prove the approach on T1 | Done: [t1-proof.html](t1-proof.html). Factory 3/3, bare 0/3 on the git diff, after one skill fix |
 | Repository set up: license, checks, privacy scan, CI | Done |
-| `START.md` (apply and update) | Done. T1 with the agent applying the factory itself: 3/3 |
-| Manifest helper and its tests | Done: `tools/factory.py`, 19 behaviour tests |
-| Smoke scenarios T3, T10 | Not started |
-| Every behaviour line has a scenario passing at its rate | Not started |
+| `START.md` and the manifest helper | Done: `tools/factory.py`, 20 behaviour tests |
+| Every behaviour line has a scenario passing at its rate | Done for B1–B11 (T1–T10); T11, T12 not built |
+
+## Scenarios (3 runs each; the stated rate is 80%, so 3 of 3)
+
+Final pass on 2026-11-05, all against the current factory text.
+
+| Scenario | Behaviour | Result | Notes |
+|---|---|---|---|
+| T1 apply, then a vague ask | B1, B6 | 3/3 | agent applies the factory itself |
+| T2 repo rules win | B2 | 3/3 | apply arm |
+| T3 update keeps local choices | B3 | 3/3 | 2/3 first: the eval had no test runner on its allow-list, so the agent stopped before shipping; test commands now allowed |
+| T4 same in Codex (T1, preinstalled) | B4 | 3/3 | |
+| T5 delegate for outcomes | B5 | 3/3 | |
+| T6 report as a page | B7 | 3/3 | |
+| T7 finish with one PR | B8 | 3/3 | |
+| T8 add a rule | B9 | 3/3 | |
+| T9 learn from corrections | B10 | 3/3 | 1/3 first; retro's Lessons table then gained a "why this stops it recurring" column and a row for every request |
+| T10 upstream only by consent | B11 | 3/3 | |
+| T11, T12 | B12, B14 | not built | |
+
+Known limits:
+- T4 covers T1 under Codex. Codex can't apply the factory headless (its
+  sandbox mounts `.agents/` and `.git` read-only), and T3 under Codex needs
+  git writes for the same reason. Cursor has no headless runner here.
+- T6 doesn't render the page at 400px in both themes: no headless browser
+  on the eval machine.
+- B12 has the privacy scan; its scenario T11 isn't built. B13 is the eval
+  runner itself.
 
 ## Open
 
@@ -24,5 +49,5 @@ define are mirrored in `evals/`.
 
 ## Next
 
-1. T3 (update keeps local choices) on typewirepy.
-2. T10 (upstream only by consent), which needs the upstream-lessons skill.
+1. T11 (private stays private) and T12 (agents test behaviour), with the
+   `behaviour-tests` skill.

@@ -11,19 +11,28 @@ repository's own rules outside this block win over it.
   lines, then work.
 - **Prompt for outcomes.** When you hand work to another agent, state the
   value and the finish line, not the steps (`prompting-for-outcomes.md`).
-- **Report in pages.** Results, reviews and questions with structure go in an
-  HTML page (`html-for-humans`), not a long chat reply.
+- **Report in pages.** Answer a request for a report, a review, a status or a
+  comparison with an HTML page made with `html-for-humans`, plus two lines in
+  chat that point to it. Short factual answers stay in chat.
 - **Ship for review.** Finished, committed work goes out as one pull request
   (`create-pr`).
 - **Test behaviour.** Tests prove what the code does for its users, fail when
   that breaks and survive a refactor. Never assert only that a field exists
   or a function was called.
-- **Learn from corrections.** When the person corrects you during a task,
-  finish with `retro`: each correction becomes a reviewable fix in a test, a
-  rule or a skill.
-- **Keep rules lean.** This file holds what an agent can't infer from the
-  repository; add a rule as one short line outside this block
-  (`rules-files.md`).
+- **Learn from corrections.** Each time the person corrects you, use `retro`:
+  fix it and add a row to a Lessons table (their words, the cause, where the
+  fix went: a test, a rule or a skill) in your reply and in the open pull
+  request. When the task ends, end your reply with the whole table.
+- **Offer lessons upstream only if opted in.** If `upstream` below is `yes`,
+  offer every lesson that would hold in any repository with
+  `contribute-upstream`, asking each time, including lessons the person gives
+  after a retro. If it's `no`, never mention sending lessons anywhere.
+- **Standing instructions go in this file.** When the person says how agents
+  should always or never work here, add it as one short line outside this
+  block, in their words, with no new heading (`rules-files.md`). Not in your
+  tool's private memory: other agents and people never see that.
+- **Keep rules lean.** This file holds only what an agent can't infer from
+  the repository.
 
 The block between the `soft-factorio` markers is installed by the factory
 and updated by reapplying it. Edits inside it are kept on update and

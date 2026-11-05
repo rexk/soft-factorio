@@ -1,6 +1,6 @@
 ---
 name: html-for-humans
-description: Write a self-contained HTML page whenever you need to show a person something richer than a chat reply, such as a report, review, status update, explainer, comparison, brief, or a decision with options to choose from. The page reads at a glance on a phone, uses visuals that make the point faster, and can collect the person's answer. Other agents read the same file, so it is built for both.
+description: Write a self-contained HTML page instead of a long chat reply. Use it whenever your answer would run past one screen or need sections, such as a report, a review, the status or health of a project or repository, an explainer, a comparison, a brief, or a decision with options to choose from. The page reads at a glance on a phone, uses visuals that make the point faster, and can collect the person's answer. Other agents read the same file, so it is built for both.
 ---
 
 # HTML for humans

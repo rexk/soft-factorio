@@ -24,6 +24,10 @@ of every session, so every line costs attention on every task. Keep it to
 
 ## Adding a rule
 
+When the person gives a standing instruction ("always...", "never...",
+"from now on..."), it goes in this file, where every agent and every
+teammate's tool reads it. Not in your tool's private memory.
+
 1. Check whether an agent could infer it from the repository. If it could,
    don't add it; say why.
 2. Write it as **one short imperative line** in the section where it
