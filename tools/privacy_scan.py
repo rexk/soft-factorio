@@ -10,16 +10,15 @@ ignored) and every commit message for:
   - phone numbers
   - home-directory paths (/home/<name>, /Users/<name>, C:\\Users\\<name>)
   - private terms, read from `.privacy-terms` in the repo (one per line,
-    gitignored) and from the PRIVACY_TERMS environment variable (newline
-    separated, e.g. a CI secret)
+    gitignored, so it exists only on your machine)
 
-A private term found is reported by its number, never its text, so the
-report is safe to print in a public CI log. Exits 1 if anything is found.
+A private term found is reported by its number, never its text. Where no
+`.privacy-terms` file exists, as in CI, the scan says so and checks the
+other patterns only. Exits 1 if anything is found.
 """
 
 from __future__ import annotations
 
-import os
 import re
 import subprocess
 import sys
@@ -48,10 +47,8 @@ class Finding:
 
 
 def private_terms(repo: Path) -> list[str]:
-    raw = os.environ.get("PRIVACY_TERMS", "")
     f = repo / ".privacy-terms"
-    if f.exists():
-        raw += "\n" + f.read_text()
+    raw = f.read_text() if f.exists() else ""
     terms = []
     for line in raw.splitlines():
         line = line.strip()
@@ -122,7 +119,7 @@ def main(argv: list[str]) -> int:
     terms = len(private_terms(repo))
     for f in found:
         print(f)
-    note = f"{terms} private terms" if terms else "no private terms configured"
+    note = f"{terms} private terms" if terms else "no .privacy-terms file, so private terms not checked"
     print(f"privacy scan: {len(found)} finding(s) in {len(files(repo))} files ({note})")
     return 1 if found else 0
 

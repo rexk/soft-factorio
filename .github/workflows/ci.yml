@@ -15,7 +15,7 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0 # the privacy scan reads every commit message
+      # Private terms live only in a local, gitignored .privacy-terms file, so
+      # CI checks the generic patterns (emails, phones, home paths) only.
       - name: Unit tests and privacy scan
-        env:
-          PRIVACY_TERMS: ${{ secrets.PRIVACY_TERMS }}
         run: python3 tools/check.py

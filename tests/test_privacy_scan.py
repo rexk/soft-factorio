@@ -1,6 +1,5 @@
 """The privacy scan, through its command line: what it catches and lets pass."""
 
-import os
 import subprocess
 import sys
 import tempfile
@@ -31,12 +30,9 @@ class Repo:
         p.parent.mkdir(parents=True, exist_ok=True)
         p.write_text(text)
 
-    def scan(self, env_terms=None):
-        env = {k: v for k, v in os.environ.items() if k != "PRIVACY_TERMS"}
-        if env_terms is not None:
-            env["PRIVACY_TERMS"] = env_terms
+    def scan(self):
         out = subprocess.run([sys.executable, "-I", str(SCAN), str(self.path)],
-                             env=env, capture_output=True, text=True)
+                             capture_output=True, text=True)
         return out.returncode, out.stdout
 
 
@@ -49,6 +45,12 @@ class PrivacyScan(unittest.TestCase):
         self.repo.write("README.md", "Write to dev@example.com or see /home/<user>/project.\n")
         code, out = self.repo.scan()
         self.assertEqual(code, 0, out)
+
+    def test_says_when_private_terms_are_not_checked(self):
+        self.repo.write("README.md", "hello\n")
+        code, out = self.repo.scan()
+        self.assertEqual(code, 0, out)
+        self.assertIn("private terms not checked", out)
 
     def test_reports_contact_details_and_home_paths_with_their_location(self):
         self.repo.write("docs/a.md", f"intro\nmail {EMAIL}\ncall {PHONE}\n")
@@ -67,17 +69,13 @@ class PrivacyScan(unittest.TestCase):
         self.assertIn("notes.md:1: private term: #1", out)
         self.assertNotIn("acmecorp", out.lower())
 
-    def test_private_terms_from_a_ci_secret(self):
-        self.repo.write("a.md", "Project Bluebird ships soon.\n")
-        code, out = self.repo.scan(env_terms="bluebird")
-        self.assertEqual(code, 1)
-        self.assertNotIn("bluebird", out.lower())
-
     def test_private_term_in_a_commit_message_is_caught(self):
+        self.repo.write(".gitignore", ".privacy-terms\n")
         self.repo.write("a.md", "fine\n")
         self.repo.git("add", "-A")
         self.repo.git("commit", "-q", "-m", "Port the AcmeCorp deploy notes")
-        code, out = self.repo.scan(env_terms="AcmeCorp")
+        self.repo.write(".privacy-terms", "AcmeCorp\n")
+        code, out = self.repo.scan()
         self.assertEqual(code, 1)
         self.assertIn("commit ", out)
 

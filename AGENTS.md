@@ -9,7 +9,8 @@ is public and lands in other people's repositories.
   home-directory paths, in any file or commit message.
 - Run `python3 tools/check.py` before every commit; it includes the privacy
   scan. Private terms to scan for go in `.privacy-terms` (one per line,
-  gitignored) or the `PRIVACY_TERMS` CI secret, never in a committed file.
+  gitignored), never in a committed file. CI has no copy of them, so this
+  local run is the only check for private names.
 - Seeds from elsewhere are rewritten, not copied, and the maintainer reviews
   each rewrite before it lands.
 
