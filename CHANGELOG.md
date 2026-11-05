@@ -1,10 +1,15 @@
 # Changelog
 
-Each release is a git tag (`v0.1.0`). Applying the factory again reads this
-file to report what changed since the version a repository has installed.
+Newest first. The factory has no release tags: a repository records the
+commit it installed, and an update lists the factory's commits since then.
+This file is the short, human summary.
 
-## Unreleased
+## 2026-11-04
 
+- `START.md`: the steps an agent follows to apply or update the factory.
+- `tools/factory.py`: installs the skills and the `AGENTS.md` block, records
+  them in `.agents/factory/manifest.json`, keeps local edits on update and
+  stops on conflicts.
 - Seed skills: `outcome-brief`, `html-for-humans`, `create-pr`.
 - Rules block for a repository's `AGENTS.md`, with a settings table.
 - Scenario eval runner (`evals/`): snapshots of local or pinned repositories,

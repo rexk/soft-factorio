@@ -1,0 +1,9 @@
+{
+  "skills": ["outcome-brief", "html-for-humans", "create-pr"],
+  "upstream_skills": [],
+  "settings": {
+    "projects": "docs/projects/",
+    "upstream": "no",
+    "pr_without_asking": "yes"
+  }
+}

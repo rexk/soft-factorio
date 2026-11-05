@@ -11,6 +11,7 @@ import json
 import os
 import shutil
 import subprocess
+import sys
 import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -95,25 +96,25 @@ def commit_all(repo: Path, message: str) -> str:
     return git(repo, "rev-parse", "HEAD").strip()
 
 
-def preinstall_factory(repo: Path, skills: list[str]) -> None:
-    """Put the factory in a repo the way an apply is meant to leave it.
+def preinstall_factory(repo: Path, upstream: str = "no") -> None:
+    """Install the factory with its helper, as an apply's mechanical part leaves it.
 
-    Used to test the skills on their own, before START.md exists or when a
-    scenario is about work after the apply rather than the apply itself.
+    Used to test the skills on their own, without an agent doing the apply.
     """
-    for name in skills:
-        src = FACTORY / "skills" / name
-        for base in (".agents/skills", ".claude/skills"):
-            dst = repo / base / name
-            dst.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copytree(src, dst, dirs_exist_ok=True)
-    guides = FACTORY / "guides"
-    if guides.exists():
-        shutil.copytree(guides, repo / ".agents/factory/guides", dirs_exist_ok=True)
-    rules = repo / "AGENTS.md"
-    block = (FACTORY / "rules-block.md").read_text()
-    existing = rules.read_text() if rules.exists() else ""
-    rules.write_text(existing.rstrip("\n") + "\n\n" + block if existing else block)
+    sh([sys.executable, str(FACTORY / "tools" / "factory.py"), "apply", str(repo),
+        "--upstream", upstream, "--source", "eval"])
+
+
+def apply_tools() -> tuple[list[str], list[str]]:
+    """Extra tools and directories an agent needs to follow START.md here."""
+    tools = [
+        f"Read({FACTORY}/**)",
+        f"Bash(python3 {FACTORY}/tools/factory.py:*)",
+        "Bash(git checkout:*)", "Bash(git switch:*)", "Bash(git branch:*)",
+        "Bash(git add:*)", "Bash(git commit:*)", "Bash(git remote:*)",
+        "Bash(git -C:*)", "Bash(git ls-remote:*)",
+    ]
+    return tools, [str(FACTORY)]
 
 
 @dataclass
@@ -128,7 +129,8 @@ class AgentRun:
 
 def run_agent(repo: Path, prompt: str, log: Path, model: str, budget_usd: float = 5.0,
               timeout_s: int = 1800, extra_tools: list[str] | None = None,
-              session: str | None = None, resume: bool = False) -> AgentRun:
+              session: str | None = None, resume: bool = False,
+              add_dirs: list[str] | None = None) -> AgentRun:
     """One headless agent turn in repo. The transcript goes to log.
 
     For a conversation, pass the same session id each turn, with resume=True
@@ -144,6 +146,8 @@ def run_agent(repo: Path, prompt: str, log: Path, model: str, budget_usd: float 
         "--output-format", "stream-json", "--verbose",
         "--max-budget-usd", str(budget_usd),
     ]
+    if add_dirs:
+        cmd += ["--add-dir", *add_dirs]
     if session:
         cmd += ["--resume", session] if resume else ["--session-id", session]
     else:

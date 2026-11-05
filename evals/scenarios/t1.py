@@ -26,11 +26,9 @@ BEHAVIOURS = ["B1", "B6"]
 REPO = None  # an empty repository, as the design brief specifies
 TASK = "add a settings page"
 ANSWER = "It's for people using a small web app. You decide the rest."
-APPLY = ("Apply the software factory to this repository, following "
-         "{factory}/START.md. Answers to its questions: contribute lessons "
-         "upstream: no.")
-
-SKILLS = ["outcome-brief", "html-for-humans", "create-pr"]
+APPLY = ("Apply the software factory to this repository by following "
+         "{factory}/START.md. The factory is the local checkout at {factory}. "
+         "My answer to the upstream question: no.")
 
 RUBRIC = """You judge a product brief a coding agent wrote. A product brief
 states only the value (who benefits, and why) and the behaviour (what people
@@ -71,12 +69,14 @@ def judge_accepts(page: str) -> bool:
 def run(dest: Path, arm: str, logdir: Path, model: str) -> dict:
     repo = lib.snapshot(REPO, dest) if REPO else lib.empty_repo(dest)
     if arm == "preinstalled":
-        lib.preinstall_factory(repo, SKILLS)
+        lib.preinstall_factory(repo)
         lib.commit_all(repo, "Apply software factory (preinstalled by eval)")
     elif arm == "apply":
-        lib.run_agent(repo, APPLY.format(factory=lib.FACTORY), logdir / "apply.jsonl",
-                      model, extra_tools=[f"Read({lib.FACTORY}/**)"])
-        lib.commit_all(repo, "Apply software factory (by agent)")
+        tools, dirs = lib.apply_tools()
+        applied = lib.run_agent(repo, APPLY.format(factory=lib.FACTORY), logdir / "apply.jsonl",
+                                model, extra_tools=tools, add_dirs=dirs)
+        (logdir / "apply-reply.txt").write_text(applied.result)
+        lib.commit_all(repo, "Commit what the apply session left uncommitted")
     base = lib.git(repo, "rev-parse", "HEAD").strip()
 
     session = str(uuid.uuid4())
