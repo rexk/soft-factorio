@@ -23,6 +23,11 @@ is public and lands in other people's repositories.
 - Eval runs cost API usage: run the smoke set (T1, T3, T10) when `START.md`
   changes, everything before a release. Test repositories are snapshots in a
   scratch folder and are never pushed to.
+- Eval agents may run what a person would approve, such as test runners
+  (`SHIP_TOOLS` in `evals/lib.py`). A run that stops on a denied command
+  measures the harness: widen the list, don't count the run.
+- A run cut short by a usage limit is void, not failed; rerun it. Run a full
+  pass in batches, the scenario most likely to fail first.
 
 ## Writing skills and tools
 
@@ -33,6 +38,11 @@ is public and lands in other people's repositories.
 - Project plans go in `docs/projects/YYYY-MM-DD-<slug>/`.
 
 ## Pull requests
+
+Don't ask for approval for simple operations like git push or creating a PR,
+or to advance to the next stage: keep going to the final stage. Check with the
+maintainer only before going public or changing a behaviour line, scenario or
+judge.
 
 | Key | Value |
 |---|---|

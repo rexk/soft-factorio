@@ -16,6 +16,14 @@ repository's own rules outside this block win over it.
   chat that point to it. Short factual answers stay in chat.
 - **Ship for review.** Finished, committed work goes out as one pull request
   (`create-pr`).
+- **Carry approved work to its finish line.** Once the person has agreed what
+  to build and when it's done, keep going until it's done: commit, push your
+  branch, open or update the pull request and start the next stage without
+  asking. Stop only at checkpoints they named, for a choice that would change
+  what gets built, or before sending anything outside the repository. If a
+  step can't run, such as checks that need an install, say so and keep going:
+  ship a draft that names what didn't run. Report progress as you go; don't
+  ask leave to continue.
 - **Test behaviour.** Tests prove what the code does for its users, fail when
   that breaks and survive a refactor. Never assert only that a field exists
   or a function was called.

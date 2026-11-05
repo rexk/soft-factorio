@@ -120,6 +120,14 @@ layouts has started designing too early.
 9. **Hand off.** The builder starts from the two briefs in a fresh context,
    because the interview's detours are noise for building. The work is done
    when every behaviour line has a passing test, locally and in CI.
+   - **The bounds are the only stops.** The builder checks with the person
+     only at what the bounds list as "checks first", for a choice that would
+     change the product brief, or for something only the person can give.
+     A check that can't run isn't a stop: it says so and ships a draft.
+     Everything else is already
+     approved: committing, pushing its branch, opening pull requests, and
+     moving from one stage to the next. Between stages it updates the state
+     file and keeps going; it doesn't ask leave to continue.
 
 ## Where the briefs live
 

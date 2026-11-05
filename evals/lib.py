@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -34,7 +35,8 @@ SHIP_TOOLS = [
     "Bash(gh:*)", "Bash(git -C:*)",
     # Running the repository's own checks, which a person would approve.
     "Bash(uv run:*)", "Bash(pytest:*)", "Bash(python -m pytest:*)",
-    "Bash(python3 -m pytest:*)", "Bash(pnpm:*)", "Bash(npx tsc:*)", "Bash(npx vitest:*)",
+    "Bash(python3 -m pytest:*)", "Bash(pnpm:*)", "Bash(corepack:*)", "Bash(npx tsc:*)",
+    "Bash(npx vitest:*)",
 ]
 
 READ_ONLY_BASH = [
@@ -300,7 +302,17 @@ def run_claude(repo: Path, prompt: str, log: Path, model: str, budget_usd: float
                            stdin=subprocess.DEVNULL, timeout=timeout_s, text=True)
         except subprocess.TimeoutExpired:
             pass
-    return parse_transcript(log)
+    run = parse_transcript(log)
+    if run.is_error and USAGE_LIMIT.search(run.result):
+        raise UsageLimit(run.result[:200])
+    return run
+
+
+USAGE_LIMIT = re.compile(r"(?i)hit your .{0,20}limit")
+
+
+class UsageLimit(Exception):
+    """The agent stopped on the account's usage limit: the run says nothing about the factory."""
 
 
 def parse_transcript(log: Path) -> AgentRun:

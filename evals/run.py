@@ -76,11 +76,14 @@ def main() -> int:
         t0 = time.time()
         try:
             res = mod.run(lib.workdir() / "runs" / stamp / name, arm, logdir, args.model)
+        except lib.UsageLimit as e:  # cut short by the account, not judged: void
+            res = {"pass": None, "void": str(e)}
         except Exception as e:  # a crashed run is a failed run, with the reason kept
             res = {"pass": False, "error": repr(e)}
         res.update(scenario=sid, arm=arm, run=i, seconds=round(time.time() - t0))
         (logdir / "result.json").write_text(json.dumps(res, indent=2))
-        print(f"{name}: {'PASS' if res['pass'] else 'FAIL'}", flush=True)
+        verdict = "VOID" if res["pass"] is None else "PASS" if res["pass"] else "FAIL"
+        print(f"{name}: {verdict}", flush=True)
         return res
 
     with ThreadPoolExecutor(args.parallel) as pool:
@@ -89,16 +92,22 @@ def main() -> int:
     summary = {}
     for r in results:
         key = f"{r['scenario']} {r['arm']}"
-        s = summary.setdefault(key, {"passed": 0, "runs": 0,
+        s = summary.setdefault(key, {"passed": 0, "runs": 0, "void": 0,
                                      "rate": getattr(load(r["scenario"]), "PASS_RATE", 0.8)})
+        if r["pass"] is None:
+            s["void"] += 1
+            continue
         s["runs"] += 1
         s["passed"] += bool(r["pass"])
-    for s in summary.values():
-        s["meets_rate"] = s["passed"] >= s["rate"] * s["runs"]
+    for s in summary.values():  # a voided run means the rate isn't shown either way
+        s["meets_rate"] = not s["void"] and s["passed"] >= s["rate"] * s["runs"]
     (out / "summary.json").write_text(json.dumps({"model": args.model, "summary": summary,
                                                    "results": results}, indent=2))
     print(f"\nResults: {out}")
     for key, s in summary.items():
+        if s["void"]:
+            print(f"  {key}: {s['passed']}/{s['runs']}, {s['void']} void (usage limit): rerun")
+            continue
         verdict = "meets" if s["meets_rate"] else "below"
         print(f"  {key}: {s['passed']}/{s['runs']} ({verdict} its rate of {s['rate']:.0%})")
     return 0
