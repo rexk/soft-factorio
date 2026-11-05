@@ -986,6 +986,122 @@
      "seconds": 114
     }
    ]
+  },
+  {
+   "pass": "T3",
+   "started": "20261105-142641",
+   "note": "T3 on the narrower eval allow-list (named checks only, no runners or installs): 3/3",
+   "summary": {
+    "T3 apply": {
+     "passed": 3,
+     "runs": 3,
+     "void": 0,
+     "rate": 0.8,
+     "meets_rate": true
+    }
+   },
+   "runs": [
+    {
+     "pass": true,
+     "title_follows_local_style": true,
+     "body_follows_new_factory": true,
+     "update_lists_change": true,
+     "update_pr_opened": true,
+     "local_edit_still_in_file": true,
+     "cost_usd": 0.836,
+     "agent_error": false,
+     "scenario": "T3",
+     "arm": "apply",
+     "run": 1,
+     "seconds": 124
+    },
+    {
+     "pass": true,
+     "title_follows_local_style": true,
+     "body_follows_new_factory": true,
+     "update_lists_change": true,
+     "update_pr_opened": true,
+     "local_edit_still_in_file": true,
+     "cost_usd": 0.72,
+     "agent_error": false,
+     "scenario": "T3",
+     "arm": "apply",
+     "run": 2,
+     "seconds": 111
+    },
+    {
+     "pass": true,
+     "title_follows_local_style": true,
+     "body_follows_new_factory": true,
+     "update_lists_change": true,
+     "update_pr_opened": false,
+     "local_edit_still_in_file": true,
+     "cost_usd": 0.615,
+     "agent_error": false,
+     "scenario": "T3",
+     "arm": "apply",
+     "run": 3,
+     "seconds": 97
+    }
+   ]
+  },
+  {
+   "pass": "T7",
+   "started": "20261105-142845",
+   "note": "T7 on the narrower eval allow-list: 3/3",
+   "summary": {
+    "T7 preinstalled": {
+     "passed": 3,
+     "runs": 3,
+     "void": 0,
+     "rate": 0.8,
+     "meets_rate": true
+    }
+   },
+   "runs": [
+    {
+     "pass": true,
+     "judge": {
+      "title_ok": true,
+      "body_ok": true,
+      "reason": "Title is specific, imperative, under 72 characters; body leads with what changed, then why, honestly states tests were not run, and has no boilerplate headings."
+     },
+     "cost_usd": 0.496,
+     "agent_error": false,
+     "scenario": "T7",
+     "arm": "preinstalled",
+     "run": 1,
+     "seconds": 84
+    },
+    {
+     "pass": true,
+     "judge": {
+      "title_ok": true,
+      "body_ok": true,
+      "reason": "Title is specific, imperative, under 72 characters; body opens with what changed, then why, and honestly states tests were not run."
+     },
+     "cost_usd": 0.456,
+     "agent_error": false,
+     "scenario": "T7",
+     "arm": "preinstalled",
+     "run": 2,
+     "seconds": 76
+    },
+    {
+     "pass": true,
+     "judge": {
+      "title_ok": true,
+      "body_ok": true,
+      "reason": "Title is specific, imperative, under 72 characters; body leads with what changed, then why, avoids boilerplate headings, and honestly states tests were not run."
+     },
+     "cost_usd": 0.461,
+     "agent_error": false,
+     "scenario": "T7",
+     "arm": "preinstalled",
+     "run": 3,
+     "seconds": 77
+    }
+   ]
   }
  ],
  "note": "Every eval verdict from 2026-11-05 (T4's Codex pass ran on 2026-11-04). Judge reasons and costs per run; transcripts and agent replies are left out. Factory text: as committed with this file."

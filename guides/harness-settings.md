@@ -1,25 +1,31 @@
-# Harness settings: let the factory's work run without a prompt each time
+# Harness settings: let the everyday work run without a prompt
 
 The factory's rules tell agents to carry approved work to its finish line:
 commit, push a branch, open the pull request and run the repository's checks.
 Your harness decides whether each of those stops to ask you. This guide is
-for the person: what to allow, what to keep guarded, and where each harness
-keeps the setting. An agent points you here; it never changes these settings
-itself.
+for the person: what to allow, what to keep asking about, and where each
+harness keeps the setting. An agent points you here; it never changes these
+settings itself.
 
-## What to allow, what to keep guarded
+## What to allow, what to keep asking about
 
-| Allow without a prompt | Keep a prompt, or block |
+| Allow without a prompt | Keep a prompt |
 |---|---|
-| `git add`, `git commit`, `git checkout -b` / `git switch -c` | Force-push (`--force`, `-f`, `+branch`) |
-| `git push` of the agent's own branch | Pushing to the default branch |
-| `gh pr create`, `gh pr edit`, `gh pr view` | Deleting branches, `rm -rf`, anything outside the repository |
-| The repository's test, lint and build commands | Sending anything to another repository (the factory asks you itself) |
+| The everyday git commands: status, diff, log, add, commit, branch, checkout, switch, stash, rebase, merge, fetch, pull, push | Programs nobody has looked at: installing packages (their install scripts run), `npx`, `uvx` or `pnpm dlx` of a package, `curl … \| sh`, scripts the agent just downloaded or wrote |
+| `gh pr create`, `gh pr edit`, `gh pr view`, `gh pr checks` | General runners that run anything they're given: `bash -c`, `python3 -c`, `uv run *`, `pnpm exec *` |
+| The repository's own check commands, each by name (`pnpm test`, `uv run pytest`) | Deleting files outside the repository, and sending anything to another repository (the factory asks you itself) |
 
-**Guard the default branch on the server.** Protect it on GitHub (require a
-pull request). Neither harness treats its command rules as a security
-boundary: a rule matches the command's text, and a reordered command can slip
-past it. Branch protection holds whatever the agent types.
+**Allow commands by name.** `Bash(pnpm test *)` lets the agent run the
+repository's tests. `Bash(pnpm *)` also lets it fetch and run any package.
+The test is whether you've read what the command runs.
+
+**Protect branches in the repository, not on your machine.** Force-push is
+part of everyday work (rebasing a branch, squashing before review), so don't
+block it locally. On GitHub, a branch protection rule or ruleset on the
+default branch blocks force-pushes and deletion, and requires a pull request.
+That holds whatever the agent types, and whichever harness it runs in. A
+local command rule matches only the command's text, and both harnesses say
+it isn't a security boundary.
 
 ## Claude Code
 
@@ -39,28 +45,27 @@ one too: take it out of `ask` rather than adding to `allow`.
 {
   "permissions": {
     "allow": [
-      "Bash(git add *)", "Bash(git commit *)", "Bash(git checkout -b *)",
-      "Bash(git switch -c *)", "Bash(git push *)",
+      "Bash(git status *)", "Bash(git diff *)", "Bash(git log *)",
+      "Bash(git add *)", "Bash(git commit *)", "Bash(git branch *)",
+      "Bash(git checkout *)", "Bash(git switch *)", "Bash(git stash *)",
+      "Bash(git rebase *)", "Bash(git merge *)", "Bash(git fetch *)",
+      "Bash(git pull *)", "Bash(git push *)",
       "Bash(gh pr create *)", "Bash(gh pr edit *)", "Bash(gh pr view *)",
-      "Bash(pnpm test *)", "Bash(uv run pytest *)"
-    ],
-    "deny": [
-      "Bash(git push --force*)", "Bash(git push * --force*)",
-      "Bash(git push -f*)", "Bash(git push * -f*)"
+      "Bash(gh pr checks *)",
+      "Bash(pnpm test *)", "Bash(pnpm lint *)", "Bash(uv run pytest *)"
     ]
   }
 }
 ```
 
-- Swap the test commands for your repository's own.
+- Swap the last line for your repository's own check commands.
+- Git subcommands are listed one by one rather than as `Bash(git *)`.
+  Options like `git -c` can make git run another program.
 - A compound command (`a && b`) runs without a prompt only when every part is
   allowed. A `cd` inside the working folder doesn't count against it.
-- Runners like `npx` aren't looked through: allow `Bash(npx vitest *)`, not
-  just `vitest`.
 - Answering a prompt with "Yes, and don't ask again" saves the rule to
-  `.claude/settings.local.json`.
-- The deny rules miss `git push origin +main` and other reorderings. That's
-  why the default branch is protected on the server.
+  `.claude/settings.local.json`. Check the rule it saves names the command,
+  not a whole runner.
 
 ## Codex
 
@@ -77,25 +82,25 @@ off. So every commit, push and pull request, and installing the factory
 itself, needs either your approval or a rule. Rules go in a `.rules` file in
 `~/.codex/rules/` (or `<repo>/.codex/rules/` in a trusted project). A rule
 with `decision = "allow"` runs that command outside the sandbox without a
-prompt. When several rules match, the strictest decision wins.
+prompt. A rule matches the command's leading words, so name each command.
 
 ```python
 # ~/.codex/rules/factory.rules
-prefix_rule(pattern = ["git", "push", ["--force", "-f", "--force-with-lease"]],
-            decision = "forbidden", justification = "No force-push from agents.")
-prefix_rule(pattern = ["git", ["add", "commit", "push"]], decision = "allow")
-prefix_rule(pattern = ["git", ["checkout", "switch"]], decision = "allow")
-prefix_rule(pattern = ["gh", "pr", ["create", "edit", "view"]], decision = "allow")
+prefix_rule(pattern = ["git", ["status", "diff", "log", "add", "commit", "branch",
+                              "checkout", "switch", "stash", "rebase", "merge",
+                              "fetch", "pull", "push"]],
+            decision = "allow")
+prefix_rule(pattern = ["gh", "pr", ["create", "edit", "view", "checks"]],
+            decision = "allow")
+prefix_rule(pattern = ["pnpm", "test"], decision = "allow")
 ```
 
+- Swap the last rule for your repository's own check commands. Don't allow
+  a bare runner such as `["npx"]` or `["uv", "run"]`.
 - Restart Codex after editing a rules file.
 - Check a rule before relying on it, for example
-  `codex execpolicy check --rules ~/.codex/rules/factory.rules git push --force origin x`.
-  That one prints `forbidden`.
-- A rule matches the command's leading words only.
-  `git push origin --force` and `git push origin +main` aren't caught by the
-  forbidden rule above, and the allow rule lets them through. Branch
-  protection covers them.
+  `codex execpolicy check --rules ~/.codex/rules/factory.rules git push origin my-branch`.
+  That one prints `allow`.
 - Codex marks rules as experimental. The factory checked these with
   `codex-cli` 0.166.
 
@@ -103,4 +108,4 @@ prefix_rule(pattern = ["gh", "pr", ["create", "edit", "view"]], decision = "allo
 
 The factory hasn't checked these yet. Look for the harness's allow-list for
 terminal commands (often called auto-run). Allow the same commands as in the
-table above, and keep the same guards.
+table above, each by name, and protect branches in the repository.

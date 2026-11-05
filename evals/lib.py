@@ -31,12 +31,15 @@ FAKES = FACTORY / "evals" / "fakes"
 SHIP_TOOLS = [
     "Bash(git checkout:*)", "Bash(git switch:*)", "Bash(git branch:*)",
     "Bash(git add:*)", "Bash(git commit:*)", "Bash(git push:*)", "Bash(git fetch:*)",
+    "Bash(git stash:*)", "Bash(git rebase:*)", "Bash(git merge:*)",
     "Bash(git remote:*)", "Bash(git rev-parse:*)", "Bash(git merge-base:*)",
-    "Bash(gh:*)", "Bash(git -C:*)",
-    # Running the repository's own checks, which a person would approve.
-    "Bash(uv run:*)", "Bash(pytest:*)", "Bash(python -m pytest:*)",
-    "Bash(python3 -m pytest:*)", "Bash(pnpm:*)", "Bash(corepack:*)", "Bash(npx tsc:*)",
-    "Bash(npx vitest:*)",
+    "Bash(gh:*)",
+    # The snapshot repositories' own check commands, each by name. No general
+    # runners (uv run *, pnpm *, npx) and no installs: those run programs
+    # nobody has inspected. A check that can't run is reported, not fixed.
+    "Bash(uv run pytest:*)", "Bash(uv run ruff:*)", "Bash(pytest:*)",
+    "Bash(python -m pytest:*)", "Bash(python3 -m pytest:*)",
+    "Bash(pnpm test:*)", "Bash(pnpm lint:*)", "Bash(pnpm check-types:*)",
 ]
 
 READ_ONLY_BASH = [
@@ -177,7 +180,7 @@ def apply_tools_for(factory: Path, repo: Path | None = None) -> tuple[list[str],
     tools = [
         f"Read({factory}/**)",
         *(f"Bash(python3 {h}:*)" for h in helpers),
-        "Bash(git -C:*)", "Bash(git ls-remote:*)",
+        "Bash(git ls-remote:*)",
     ] + SHIP_TOOLS
     return tools, [str(factory)]
 

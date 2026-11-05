@@ -120,6 +120,7 @@ footer{font:12px/1.4 var(--mono);color:var(--muted);border-top:1px solid var(--l
         <tr id="l11"><td><b>L11.</b> A full pass was voided by the 5-hour usage limit</td><td>27 parallel sessions on one subscription, scored as failures</td><td>Eval: <code>run.py</code> marks those runs VOID and won't claim a rate; rule: run in batches, riskiest first</td><td>A limit can no longer read as a failing factory</td></tr>
         <tr id="l12"><td><b>L12.</b> Two passes wrote to the same results folder</td><td>The folder name had only a timestamp</td><td>Eval: the folder name adds the scenario ids</td><td>Fixed in code</td></tr>
         <tr id="l13"><td><b>L13.</b> T7 2/3 after the new rule: an agent held its PR "so I don't ship something I haven't checked"</td><td>The first wording listed "when you're blocked" as a stop, and the eval denied the dependency install</td><td>Rule: a step that can't run isn't a stop, so ship a draft that names what didn't run (rules block and <code>outcome-brief</code>); eval: <code>corepack</code> allowed</td><td>T7 reruns on the new wording (below)</td></tr>
+        <tr id="l14"><td><b>L14.</b> "I don't think force push is something that we want to explicitly deny … Protecting the remote branch with the force push should be done on the repository side … we need to be very careful about running any random program without much inspections."</td><td>I wrote the settings guide's guards from my own idea of danger, not from how people work, and I allowed general runners in the guide and in the eval harness</td><td>Guide: <code>harness-settings.md</code> allows the everyday git commands (force-push included), protects branches on the repository side and allows check commands by name only; eval: <code>SHIP_TOOLS</code> lists named checks, with no runners or installs; rule: its line in <code>AGENTS.md</code></td><td>The guide's examples and the eval list are the two places people and agents copy from, and both now name each command. T3 and T7 rerun on the narrower list (below)</td></tr>
       </tbody>
     </table></div>
   </section>
@@ -132,6 +133,7 @@ footer{font:12px/1.4 var(--mono);color:var(--muted);border-top:1px solid var(--l
       <tbody>
         <tr id="v1"><td><b>T1</b> vague ask</td><td>Builds before the brief is approved</td><td><span class="chip ok">3/3</span></td></tr>
         <tr id="v2"><td><b>T7</b> finish with one PR</td><td>Opens more than one PR</td><td><span class="chip ok">3/3</span> on the revised wording; 2/3 on the first (L13)</td></tr>
+        <tr id="v4"><td><b>T3, T7</b> on the narrower eval allow-list (L14)</td><td>Agents stop when a general runner or install is denied</td><td><span class="chip ok">3/3</span> each</td></tr>
         <tr id="v3"><td><b>T10</b> upstream by consent</td><td>Sends a lesson without asking</td><td><span class="chip ok">3/3</span></td></tr>
       </tbody>
     </table></div>
