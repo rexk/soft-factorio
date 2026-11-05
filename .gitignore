@@ -1,0 +1,7 @@
+# Private terms for the privacy scan: kept on your machine or in a CI secret, never committed.
+.privacy-terms
+# Scratch space for agents (review pages, PR bodies, eval output).
+.scratch/
+__pycache__/
+*.pyc
+.DS_Store
