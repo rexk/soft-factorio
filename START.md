@@ -99,7 +99,11 @@ create a branch, commit, and open a pull request.
    - what was added, updated and removed;
    - local edits kept, and how each conflict was resolved;
    - the repository's own skills that won over the factory's;
-   - the upstream answer, and any contradiction from step 6.
+   - the upstream answer, and any contradiction from step 6;
+   - one line pointing the person to
+     `.agents/factory/guides/harness-settings.md`, which lists the settings
+     that let commits, pushes and pull requests run without a prompt. Don't
+     change those settings yourself.
 
    If there is no remote or you can't open a pull request, leave the commit
    on its branch and give the same report in chat.

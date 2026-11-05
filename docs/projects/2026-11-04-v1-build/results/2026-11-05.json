@@ -769,6 +769,223 @@
      "seconds": 109
     }
    ]
+  },
+  {
+   "pass": "T3-T1",
+   "started": "20261105-133613",
+   "note": "Smoke set after START.md points to harness-settings.md. T3 2/3: one run called the helper by a relative path the eval didn't allow",
+   "summary": {
+    "T3 apply": {
+     "passed": 2,
+     "runs": 3,
+     "void": 0,
+     "rate": 0.8,
+     "meets_rate": false
+    },
+    "T1 apply": {
+     "passed": 3,
+     "runs": 3,
+     "void": 0,
+     "rate": 0.8,
+     "meets_rate": true
+    }
+   },
+   "runs": [
+    {
+     "pass": true,
+     "judge": {
+      "is_product_brief": true,
+      "value_behaviour_only": true,
+      "reason": "The product.html states who benefits and what people can do or see (theme, text size, instant apply, persistence on the same browser, reset, graceful fallback, accessibility) without naming any tool, framework, library, storage mechanism or file layout; B7's mention of 'blocked storage' describes a user-visible condition rather than an implementation choice."
+     },
+     "cost_usd": 0.513,
+     "agent_error": false,
+     "scenario": "T1",
+     "arm": "apply",
+     "run": 1,
+     "seconds": 127
+    },
+    {
+     "pass": true,
+     "judge": {
+      "is_product_brief": true,
+      "value_behaviour_only": true,
+      "reason": "The brief states value (V0\u2013V3) and user-visible behaviour (B1\u2013B9) without naming tools, frameworks, storage mechanisms or file layouts; 'Kept per browser' and 'a minimal web app' describe scope and where settings persist, not how they are built."
+     },
+     "cost_usd": 0.507,
+     "agent_error": false,
+     "scenario": "T1",
+     "arm": "apply",
+     "run": 2,
+     "seconds": 127
+    },
+    {
+     "pass": true,
+     "judge": {
+      "is_product_brief": true,
+      "value_behaviour_only": true,
+      "reason": "The brief states who benefits (V0\u2013V3) and what people can do or see (B1\u2013B8), and persistence is described only by visibility ('still there after a reload and on the next visit from the same device and browser') without naming any tool, framework, or storage mechanism."
+     },
+     "cost_usd": 0.582,
+     "agent_error": false,
+     "scenario": "T1",
+     "arm": "apply",
+     "run": 3,
+     "seconds": 149
+    },
+    {
+     "pass": false,
+     "title_follows_local_style": true,
+     "body_follows_new_factory": false,
+     "update_lists_change": true,
+     "update_pr_opened": false,
+     "local_edit_still_in_file": true,
+     "cost_usd": 0.637,
+     "agent_error": false,
+     "scenario": "T3",
+     "arm": "apply",
+     "run": 1,
+     "seconds": 100
+    },
+    {
+     "pass": true,
+     "title_follows_local_style": true,
+     "body_follows_new_factory": true,
+     "update_lists_change": true,
+     "update_pr_opened": false,
+     "local_edit_still_in_file": true,
+     "cost_usd": 0.711,
+     "agent_error": false,
+     "scenario": "T3",
+     "arm": "apply",
+     "run": 2,
+     "seconds": 120
+    },
+    {
+     "pass": true,
+     "title_follows_local_style": true,
+     "body_follows_new_factory": true,
+     "update_lists_change": true,
+     "update_pr_opened": true,
+     "local_edit_still_in_file": true,
+     "cost_usd": 0.651,
+     "agent_error": false,
+     "scenario": "T3",
+     "arm": "apply",
+     "run": 3,
+     "seconds": 98
+    }
+   ]
+  },
+  {
+   "pass": "T10",
+   "started": "20261105-134042",
+   "note": "Smoke set after the START.md change: 3/3",
+   "summary": {
+    "T10 preinstalled": {
+     "passed": 3,
+     "runs": 3,
+     "void": 0,
+     "rate": 0.8,
+     "meets_rate": true
+    }
+   },
+   "runs": [
+    {
+     "pass": true,
+     "opted_out_ok": true,
+     "opted_in_ok": true,
+     "asked_after_lesson_1": true,
+     "asked_after_lesson_2": true,
+     "cost_usd": 6.442,
+     "scenario": "T10",
+     "arm": "preinstalled",
+     "run": 1,
+     "seconds": 342
+    },
+    {
+     "pass": true,
+     "opted_out_ok": true,
+     "opted_in_ok": true,
+     "asked_after_lesson_1": true,
+     "asked_after_lesson_2": true,
+     "cost_usd": 5.834,
+     "scenario": "T10",
+     "arm": "preinstalled",
+     "run": 2,
+     "seconds": 316
+    },
+    {
+     "pass": true,
+     "opted_out_ok": true,
+     "opted_in_ok": true,
+     "asked_after_lesson_1": true,
+     "asked_after_lesson_2": true,
+     "cost_usd": 5.434,
+     "scenario": "T10",
+     "arm": "preinstalled",
+     "run": 3,
+     "seconds": 302
+    }
+   ]
+  },
+  {
+   "pass": "T3",
+   "started": "20261105-134713",
+   "note": "T3 with the helper allowed by relative path too: 3/3, every update report points to the settings guide",
+   "summary": {
+    "T3 apply": {
+     "passed": 3,
+     "runs": 3,
+     "void": 0,
+     "rate": 0.8,
+     "meets_rate": true
+    }
+   },
+   "runs": [
+    {
+     "pass": true,
+     "title_follows_local_style": true,
+     "body_follows_new_factory": true,
+     "update_lists_change": true,
+     "update_pr_opened": true,
+     "local_edit_still_in_file": true,
+     "cost_usd": 0.784,
+     "agent_error": false,
+     "scenario": "T3",
+     "arm": "apply",
+     "run": 1,
+     "seconds": 124
+    },
+    {
+     "pass": true,
+     "title_follows_local_style": true,
+     "body_follows_new_factory": true,
+     "update_lists_change": true,
+     "update_pr_opened": true,
+     "local_edit_still_in_file": true,
+     "cost_usd": 0.847,
+     "agent_error": false,
+     "scenario": "T3",
+     "arm": "apply",
+     "run": 2,
+     "seconds": 137
+    },
+    {
+     "pass": true,
+     "title_follows_local_style": true,
+     "body_follows_new_factory": true,
+     "update_lists_change": true,
+     "update_pr_opened": true,
+     "local_edit_still_in_file": true,
+     "cost_usd": 0.695,
+     "agent_error": false,
+     "scenario": "T3",
+     "arm": "apply",
+     "run": 3,
+     "seconds": 114
+    }
+   ]
   }
  ],
  "note": "Every eval verdict from 2026-11-05 (T4's Codex pass ran on 2026-11-04). Judge reasons and costs per run; transcripts and agent replies are left out. Factory text: as committed with this file."

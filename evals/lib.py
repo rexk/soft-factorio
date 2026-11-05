@@ -159,7 +159,7 @@ def apply_tools() -> tuple[list[str], list[str]]:
 def agent_apply(repo: Path, logdir: Path, model: str, upstream: str = "no",
                 factory: Path = FACTORY, gh_log: Path | None = None) -> AgentRun:
     """A session that applies (or updates) the factory by following its START.md."""
-    tools, dirs = apply_tools_for(factory)
+    tools, dirs = apply_tools_for(factory, repo)
     prompt = (f"Apply the software factory to this repository by following "
               f"{factory}/START.md. The factory is the local checkout at {factory}.")
     if upstream:
@@ -170,10 +170,13 @@ def agent_apply(repo: Path, logdir: Path, model: str, upstream: str = "no",
     return run
 
 
-def apply_tools_for(factory: Path) -> tuple[list[str], list[str]]:
+def apply_tools_for(factory: Path, repo: Path | None = None) -> tuple[list[str], list[str]]:
+    helpers = [f"{factory}/tools/factory.py"]
+    if repo is not None:  # the agent may call the helper by a path relative to the repo
+        helpers.append(os.path.relpath(factory / "tools" / "factory.py", repo))
     tools = [
         f"Read({factory}/**)",
-        f"Bash(python3 {factory}/tools/factory.py:*)",
+        *(f"Bash(python3 {h}:*)" for h in helpers),
         "Bash(git -C:*)", "Bash(git ls-remote:*)",
     ] + SHIP_TOOLS
     return tools, [str(factory)]

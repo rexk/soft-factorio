@@ -21,6 +21,11 @@ opens a pull request with the skills, one marked block in `AGENTS.md`, and a
 record of what it installed. Run the same request later to update: local
 edits are kept, and the agent asks before overriding any.
 
+The factory's agents commit, push their branch and open pull requests
+without asking. To stop your harness prompting for each of those, see
+[guides/harness-settings.md](guides/harness-settings.md): what to allow and
+what to keep guarded, for Claude Code and Codex.
+
 ## What a repository gets
 
 | Behaviour | What it means for the repository |
