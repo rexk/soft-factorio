@@ -30,6 +30,10 @@ is public and lands in other people's repositories.
   harness: fix the list, don't count the run.
 - A run cut short by a usage limit is void, not failed; rerun it. Run a full
   pass in batches, the scenario most likely to fail first.
+- Each pass appends its numbers to `evals/ledger.jsonl`; commit it with the
+  change it measured. `python3 tools/metrics.py compare` puts versions side
+  by side. The numbers carry no verdict: add what you think they mean with
+  `tools/metrics.py add-reading`.
 
 ## Writing skills and tools
 
