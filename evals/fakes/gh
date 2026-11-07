@@ -4,7 +4,9 @@
 Each call is appended to $FAKE_GH_LOG as one JSON line: the arguments, plus
 the title and body of any pull request or issue it creates or edits. Pull
 requests are remembered per branch, so `gh pr view <branch>` finds one this
-run opened.
+run opened. With $FAKE_GH_PRS naming a JSON file of pull requests, `gh pr
+list` prints those instead (filtered by --state, cut at --limit), so tests
+can read a repository's pull request history without a network.
 """
 
 import json
@@ -82,6 +84,14 @@ def main(args):
         entry.update(edited="pr", title=flag(args, "--title", "-t"), body=body_of(args))
         log(entry)
         print(f"https://github.com/{REPO}/pull/{args[2] if len(args) > 2 else 1}")
+        return 0
+    if args[:2] == ["pr", "list"] and os.environ.get("FAKE_GH_PRS"):
+        log(entry)
+        prs = json.loads(Path(os.environ["FAKE_GH_PRS"]).read_text())
+        state = (flag(args, "--state", "-s") or "open").upper()
+        if state != "ALL":
+            prs = [p for p in prs if p.get("state") == state]
+        print(json.dumps(prs[:int(flag(args, "--limit", "-L") or 30)]))
         return 0
     if args[:2] in (["pr", "view"], ["pr", "list"]):
         branch = args[2] if args[:2] == ["pr", "view"] and len(args) > 2 and not args[2].startswith("-") \
