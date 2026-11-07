@@ -13,6 +13,13 @@ This file is the short, human summary.
 - `tools/metrics.py`: `compare` puts versions side by side as JSON, or as a
   page with `--html`; `add-reading` records what someone thinks the numbers
   mean. No scores, verdicts or gates.
+- `metrics` skill, installed with the factory: a repository's own numbers
+  (agent pull requests merged, closed or open, review rounds, time to
+  merge, reverts, corrections from retro Lessons tables) before the
+  factory and for each factory version it applied, computed on demand from
+  git, the manifest's history and `gh pr list`. Readings go in
+  `.agents/metrics/ledger.jsonl`. The ledger code it shares with
+  `tools/metrics.py` now lives in the skill's folder.
 
 ## 2026-11-04
 
