@@ -210,6 +210,29 @@ class Update(Case):
         self.assertIn("Teach alpha to ask first", out)
         self.assertNotIn("Start the factory", out)
 
+    def test_an_update_carries_the_changelog_entries_added_since_the_installed_commit(self):
+        self.factory.write("CHANGELOG.md", "# Changelog\n\n## Day 1\n\n- Old news.\n")
+        self.factory_commit("Start the factory")
+        self.apply()
+        self.factory.write("CHANGELOG.md", "# Changelog\n\n## Day 2\n\n"
+                           "- **Action needed:** allow git push in your harness.\n\n"
+                           "## Day 1\n\n- Old news.\n")
+        self.factory_commit("Note the push setting")
+        out = self.apply()
+        self.assertIn("Action needed:** allow git push in your harness.", out)
+        self.assertNotIn("Old news", out)
+
+    def test_says_when_the_repository_is_already_up_to_date(self):
+        self.factory_commit("Start the factory")
+        self.apply()
+        code, out = self.run_tool("plan")
+        self.assertEqual(code, 0, out)
+        self.assertIn("Up to date", out)
+        self.factory.write("skills/alpha/SKILL.md", "alpha v2\n")
+        self.factory_commit("Teach alpha to ask first")
+        code, out = self.run_tool("plan")
+        self.assertNotIn("Up to date", out)
+
     def test_records_an_uncommitted_factory_as_modified(self):
         self.factory_commit("v")
         self.apply()

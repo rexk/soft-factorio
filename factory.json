@@ -3,7 +3,8 @@
     "outcome-brief",
     "html-for-humans",
     "create-pr",
-    "retro"
+    "retro",
+    "update-factory"
   ],
   "upstream_skills": [
     "contribute-upstream"
