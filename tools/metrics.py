@@ -33,27 +33,22 @@ pushed, posted or sent anywhere. Python 3, standard library only.
 from __future__ import annotations
 
 import argparse
-import datetime
 import hashlib
 import html
 import json
-import os
-import re
 import subprocess
 import sys
 from pathlib import Path
 
-try:
-    import fcntl
-except ImportError:  # not on Windows; appends there are single writes only
-    fcntl = None
-
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from factory import LEDGER, NOT_FACTORY_TEXT, factory_version, git_out  # noqa: E402
-
 FACTORY = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+# The ledger code is shared with the metrics skill, which ships it to adopting repositories.
+sys.path.append(str(FACTORY / "skills" / "metrics"))
+from factory import LEDGER, NOT_FACTORY_TEXT, factory_version, git_out  # noqa: E402
+from metrics_ledger import (MAX_READING, append, cell, compare_rows, inside, mean,  # noqa: E402,F401
+                            now, read, reading, readings_about, render as render_page, select as pick)
+
 DEFAULT_PAGE = ".scratch/metrics/compare.html"
-MAX_READING = 1000  # readings are short notes, not transcripts
 
 # What each number counts. Every number in the output carries its row's definition.
 DEFINITIONS = {
@@ -83,42 +78,8 @@ def ledger_path(root: Path = FACTORY) -> Path:
     return root / LEDGER
 
 
-def append(path: Path, entries: list[dict]) -> None:
-    """Append entries as JSON lines in one locked write, so parallel passes don't interleave."""
-    data = "".join(json.dumps(e, separators=(",", ":")) + "\n" for e in entries).encode()
-    path.parent.mkdir(parents=True, exist_ok=True)
-    fd = os.open(path, os.O_WRONLY | os.O_APPEND | os.O_CREAT, 0o644)
-    try:
-        if fcntl:
-            fcntl.flock(fd, fcntl.LOCK_EX)
-        while data:
-            data = data[os.write(fd, data):]
-    finally:
-        os.close(fd)  # closing releases the lock
-
-
-def read(path: Path) -> list[dict]:
-    """Every entry, in the order written; exact duplicates (as a union merge can leave) once."""
-    if not path.exists():
-        return []
-    seen, entries = set(), []
-    for n, line in enumerate(path.read_text().splitlines(), 1):
-        if not line.strip() or line in seen:
-            continue
-        seen.add(line)
-        try:
-            entries.append(json.loads(line))
-        except json.JSONDecodeError as e:
-            raise ValueError(f"{path.name}:{n}: not a JSON line ({e.msg})") from None
-    return entries
-
-
 def key_of(entry: dict) -> str:
     return entry["version"] + (f"+{entry['state']}" if entry.get("state") else "")
-
-
-def now() -> str:
-    return datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="minutes")
 
 
 # -------------------------------------------------------- versions and states
@@ -250,23 +211,6 @@ def import_results(path: Path, factory: Path = FACTORY) -> list[dict]:
 
 # ------------------------------------------------------------------- compare
 
-def natural(s: str) -> list:
-    return [int(t) if t.isdigit() else t for t in re.split(r"(\d+)", s)]
-
-
-def mean(xs: list) -> float | None:
-    xs = [x for x in xs if x is not None]
-    return sum(xs) / len(xs) if xs else None
-
-
-def cell(value, count: int, source: str, digits: int = 3) -> dict:
-    if value is None:
-        return {"value": None, "missing": True, "count": count, "source": source}
-    if isinstance(value, float):
-        value = round(value, digits)
-    return {"value": value, "missing": False, "count": count, "source": source}
-
-
 def versions(entries: list[dict]) -> list[dict]:
     """Every version key in the ledger, in the order it first appears."""
     out: dict[str, dict] = {}
@@ -292,17 +236,7 @@ def select(all_versions: list[dict], wanted: list[str]) -> list[dict]:
     A name is a version key or the start of one (a commit prefix picks every
     state on that commit), or the start of a pass id, such as its timestamp.
     """
-    if not wanted:
-        return all_versions
-    picked = []
-    for w in wanted:
-        hits = [v for v in all_versions
-                if v["version"].startswith(w)
-                or any(i.startswith(w) for i in v["passes"] + v["calibrations"])]
-        if not hits:
-            raise ValueError(f"no version in the ledger matches {w!r}")
-        picked += [v for v in hits if v not in picked]
-    return [v for v in all_versions if v in picked]
+    return pick(all_versions, wanted, lambda v: v["passes"] + v["calibrations"])
 
 
 def group_numbers(runs: list[dict], pass_mark, bare: list[dict] | None, src: str) -> dict:
@@ -384,31 +318,7 @@ def compare(entries: list[dict], wanted: list[str] | None = None) -> dict:
     chosen = select(versions(entries), wanted or [])
     keys = [v["version"] for v in chosen]
     nums = {k: numbers_of(entries, k) for k in keys}
-    groups = sorted({g for k in keys for g in nums[k]}, key=natural)
-    order = list(DEFINITIONS)
-    rows = []
-    for g in groups:
-        metrics = sorted({m for k in keys for m in nums[k].get(g, {})},
-                         key=lambda m: (order.index(m) if m in order else len(order), m))
-        for m in metrics:
-            cells, prev = [], None  # prev: the last earlier version that ran this group
-            for k in keys:
-                if g not in nums[k]:
-                    c = {"value": None, "missing": True, "count": 0, "source": ABSENT}
-                    c.update(version=k, change=None, change_from=None)
-                    cells.append(c)
-                    continue
-                c = dict(nums[k][g].get(m) or cell(None, 0, "not recorded in this version"))
-                p = nums[prev][g].get(m) if prev else None
-                change = None
-                if p and not p["missing"] and not c["missing"] \
-                        and not isinstance(c["value"], bool) and isinstance(c["value"], (int, float)):
-                    change = round(c["value"] - p["value"], 3)
-                c.update(version=k, change=change, change_from=prev)
-                cells.append(c)
-                prev = k
-            rows.append({"group": g, "metric": m, "definition": definition(m), "cells": cells})
-    readings = [e for e in entries if e.get("kind") == "reading" and set(e.get("about", [])) & set(keys)]
+    rows = compare_rows(keys, nums, definition, list(DEFINITIONS), ABSENT)
     return {
         "about": ("The factory's eval numbers per version, in the order the ledger recorded them. "
                   "Each change is the difference from the last earlier version that ran the same "
@@ -417,50 +327,11 @@ def compare(entries: list[dict], wanted: list[str] | None = None) -> dict:
         "ledger": LEDGER,
         "versions": chosen,
         "rows": rows,
-        "readings": [{k: r.get(k) for k in ("date", "author", "about", "text")} for r in readings],
+        "readings": readings_about(entries, keys),
     }
 
 
 # ---------------------------------------------------------------------- page
-
-PAGE_STYLE = """
-:root{--bg:#f4f5f7;--surface:#ffffff;--fg:#1a1f27;--muted:#5d6672;--line:#d6dae0;
---accent:#2f5fd0;--accent-soft:#e6ecfb;--sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
---mono:ui-monospace,Menlo,Consolas,monospace;color-scheme:light}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#12161b;--surface:#1b2027;
---fg:#e6e9ed;--muted:#9aa3ae;--line:#2e3540;--accent:#7ea2ff;--accent-soft:#1f2a44;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#12161b;--surface:#1b2027;--fg:#e6e9ed;--muted:#9aa3ae;--line:#2e3540;
---accent:#7ea2ff;--accent-soft:#1f2a44;color-scheme:dark}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 var(--sans)}
-main{max-width:960px;margin:0 auto;padding:24px 16px 48px;display:flex;flex-direction:column;gap:28px}
-h1{font-size:1.6rem;line-height:1.2;margin:0;text-wrap:balance}
-h2{font-size:1.15rem;margin:0 0 8px}
-p{margin:0 0 8px}
-ul{margin:0;padding-left:1.2em} li{margin:0 0 6px}
-code{font:.88em var(--mono)}
-a{color:var(--accent)}
-.meta{font:13px/1.4 var(--mono);color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:8px}
-.takeaway{background:var(--accent-soft);border-left:4px solid var(--accent);padding:12px 14px;border-radius:0 6px 6px 0;font-weight:600}
-.scroll{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:6px}
-table{border-collapse:collapse;width:100%;font-size:.9rem}
-th,td{text-align:left;padding:6px 10px;border-bottom:1px solid var(--line);vertical-align:top}
-th{color:var(--muted);font-weight:600;font-size:.8rem}
-td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-td.metric{white-space:nowrap}
-.sub{display:block;color:var(--muted);font-size:.78rem;font-weight:400}
-.missing{color:var(--muted);font-style:italic}
-details{margin-top:6px} summary{cursor:pointer}
-summary:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-footer{font:12px/1.4 var(--mono);color:var(--muted);border-top:1px solid var(--line);padding-top:10px}
-"""
-
-
-def fmt(v) -> str:
-    if isinstance(v, float):
-        return f"{v:.3f}".rstrip("0").rstrip(".") if v % 1 else f"{v:.0f}"
-    return str(v)
-
 
 def short(key: str) -> str:
     version, _, state = key.partition("+")
@@ -471,104 +342,36 @@ def short(key: str) -> str:
 def render(data: dict) -> str:
     e = html.escape
     vs = data["versions"]
-    label = {v["version"]: f"V{i}" for i, v in enumerate(vs, 1)}
-    today = datetime.date.today().isoformat()
-    parts = [
-        "<!doctype html>", '<html lang="en">', "<head>", '<meta charset="utf-8">',
-        '<meta name="viewport" content="width=device-width, initial-scale=1">',
-        f"<title>The factory's eval numbers for {len(vs)} versions, side by side</title>",
-        f"<style>{PAGE_STYLE}</style>", "</head>", "<body>", "<main>", "<header>",
-        f"<h1>The factory's eval numbers for {len(vs)} versions, side by side</h1>",
-        f'<div class="meta"><span>Date: <time datetime="{today}">{today}</time></span>'
-        f"<span>Author: tools/metrics.py</span><span>Source: <code>{e(data['ledger'])}</code></span></div>",
-        "</header>",
-        '<p class="takeaway">Each version\'s numbers sit next to the last earlier version that ran the '
-        "same scenario and arm, with the change between them. A change is a difference, not a verdict: "
-        "what the numbers mean is for you to say, and the readings people and agents wrote are at the end.</p>",
-        '<section id="versions"><h2>Versions</h2>',
-        "<p>In the order the ledger recorded them. A <code>-modified</code> version had uncommitted "
-        "changes; the part after <code>+</code> tells uncommitted states apart.</p>",
-        '<div class="scroll"><table><thead><tr><th>ID</th><th>Version</th><th>Date</th>'
-        "<th>Passes</th><th>Source</th></tr></thead><tbody>",
-    ]
     all_notes = list(dict.fromkeys(n for v in vs for n in v["version_notes"]))
-    for v in vs:
+
+    def version_cells(v: dict) -> list[str]:
         notes = "".join(f'<span class="sub">version {"*" * (all_notes.index(n) + 1)}</span>'
                         for n in v["version_notes"])
         models = f'<span class="sub">model: {e(", ".join(v["models"]))}</span>' if v["models"] else ""
-        runs = ", ".join(v["passes"] + v["calibrations"])
-        parts.append(
-            f'<tr id="{label[v["version"]].lower()}"><td><b>{label[v["version"]]}</b></td>'
-            f'<td><code>{e(v["version"])}</code></td><td>{e(str(v["first_date"] or ""))}</td>'
-            f"<td>{e(runs)}</td><td>{e(', '.join(v['sources']))}{models}{notes}</td></tr>")
-    parts.append("</tbody></table></div>")
-    parts += [f'<p class="sub">{"*" * i} Version {e(n)}.</p>' for i, n in enumerate(all_notes, 1)]
-    parts.append("</section>")
+        return [e(str(v["first_date"] or "")), e(", ".join(v["passes"] + v["calibrations"])),
+                e(", ".join(v["sources"])) + models + notes]
 
-    groups: dict[str, list] = {}
-    for row in data["rows"]:
-        groups.setdefault(row["group"], []).append(row)
-    parts.append('<section id="numbers"><h2>Numbers, by scenario and arm</h2>'
-                 "<p>Every number for every version shown. Columns are the versions that ran each "
-                 "scenario and arm; <i>n</i> is how many runs a number rests on. Definitions and "
-                 "sources are under each table.</p></section>")
-    for g, rows in groups.items():
-        cols = [c["version"] for c in rows[0]["cells"] if c["source"] != ABSENT]
-        gid = "g-" + re.sub(r"[^a-z0-9]+", "-", g.lower()).strip("-")
-        parts.append(f'<section id="{gid}"><h2>{e(g)}</h2><div class="scroll"><table><thead><tr><th>Number</th>')
-        parts += [f'<th><a href="#{label[k].lower()}">{label[k]}</a><span class="sub">{e(short(k))}</span></th>'
-                  for k in cols]
-        parts.append("</tr></thead><tbody>")
-        for r in rows:
-            by = {c["version"]: c for c in r["cells"]}
-            parts.append(f'<tr><td class="metric">{e(r["metric"])}</td>')
-            for k in cols:
-                c = by[k]
-                if c["missing"]:
-                    parts.append(f'<td class="num"><span class="missing">missing</span>'
-                                 f'<span class="sub">n={c["count"]}</span></td>')
-                    continue
-                ch = ""
-                if c["change"] is not None:
-                    sign = "+" if c["change"] > 0 else ""
-                    ch = f'<span class="sub">{sign}{fmt(c["change"])} from {label[c["change_from"]]}</span>'
-                parts.append(f'<td class="num">{e(fmt(c["value"]))}<span class="sub">n={c["count"]}</span>{ch}</td>')
-            parts.append("</tr>")
-        parts.append("</tbody></table></div><details><summary>Definitions and sources</summary><ul>")
-        for r in rows:
-            parts.append(f"<li><b>{e(r['metric'])}</b>: {e(r['definition'])}</li>")
-        srcs = sorted({c["source"] for r in rows for c in r["cells"] if c["version"] in cols})
-        parts += [f'<li class="sub">Source: {e(s)}</li>' for s in srcs]
-        parts.append("</ul></details></section>")
-
-    parts.append('<section id="readings"><h2>Readings</h2>')
-    if data["readings"]:
-        parts.append("<p>What people and agents wrote about these versions, oldest first. "
-                     "A new reading never replaces an earlier one.</p><ul>")
-        for r in data["readings"]:
-            about = ", ".join(label.get(a, a) for a in r["about"])
-            parts.append(f'<li><span class="sub">{e(str(r["date"]))} · {e(str(r["author"]))} · '
-                         f"about {e(about)}</span>{e(str(r['text']))}</li>")
-        parts.append("</ul>")
-    else:
-        parts.append("<p>No readings yet about these versions.</p>")
-    parts.append("<p>Add one with <code>python3 tools/metrics.py add-reading --about VERSION "
-                 "--author WHO --text TEXT</code>.</p></section>")
-    parts.append(f"<footer>Composed {today} by tools/metrics.py from {e(data['ledger'])}. "
-                 "The same comparison as JSON: <code>python3 tools/metrics.py compare</code>.</footer>")
-    parts += ["</main>", "</body>", "</html>", ""]
-    return "\n".join(parts)
+    return render_page({
+        "title": f"The factory's eval numbers for {len(vs)} versions, side by side",
+        "author": "tools/metrics.py", "absent": ABSENT,
+        "takeaway": ("Each version's numbers sit next to the last earlier version that ran the "
+                     "same scenario and arm, with the change between them. A change is a difference, "
+                     "not a verdict: what the numbers mean is for you to say, and the readings people "
+                     "and agents wrote are at the end."),
+        "versions_intro": ("In the order the ledger recorded them. A <code>-modified</code> version had "
+                           "uncommitted changes; the part after <code>+</code> tells uncommitted states apart."),
+        "version_headers": ["Date", "Passes", "Source"], "version_cells": version_cells,
+        "version_notes": all_notes, "short": short,
+        "numbers_heading": "Numbers, by scenario and arm",
+        "numbers_intro": ("Every number for every version shown. Columns are the versions that ran each "
+                          "scenario and arm; <i>n</i> is how many runs a number rests on. Definitions and "
+                          "sources are under each table."),
+        "add_reading": "python3 tools/metrics.py add-reading --about VERSION --author WHO --text TEXT",
+        "json_command": "python3 tools/metrics.py compare",
+    }, data)
 
 
 # ----------------------------------------------------------------------- cli
-
-def inside(path: Path, root: Path) -> bool:
-    try:
-        path.resolve().relative_to(root.resolve())
-        return True
-    except ValueError:
-        return False
-
 
 def main(argv: list[str], factory: Path = FACTORY) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
@@ -607,15 +410,8 @@ def main(argv: list[str], factory: Path = FACTORY) -> int:
                 print(f"page: {args.html}", file=sys.stderr)
             print(json.dumps(data, indent=1))
         elif args.command == "add-reading":
-            text = args.text.strip()
-            if not text or not args.author.strip():
-                raise ValueError("a reading needs an author and some text")
-            if len(text) > MAX_READING:
-                raise ValueError(f"a reading is a short note: {len(text)} characters, "
-                                 f"keep it under {MAX_READING}")
             about = [v["version"] for v in select(versions(entries), args.about)]
-            entry = {"kind": "reading", "about": about, "author": args.author.strip(),
-                     "date": now(), "text": text}
+            entry = reading(about, args.author, args.text)
             append(path, [entry])
             print(json.dumps(entry, indent=1))
     except ValueError as err:
