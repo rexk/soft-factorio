@@ -36,6 +36,21 @@ That holds whatever the agent types, and whichever harness it runs in. A
 local command rule matches only the command's text, and both harnesses say
 it isn't a security boundary.
 
+## Why you keep getting asked
+
+First, check who is asking. If the agent asks in chat ("Shall I push?"),
+that's the agent: tell it to carry on, and the factory's `retro` skill turns
+that into a lesson. If your harness shows an approval prompt, it's a setting,
+and the agent often can't tell you approved one. These are the usual causes:
+
+| You see | Likely cause | Fix |
+|---|---|---|
+| Every `git push` asks, though the repository allows it | A `git push` rule under `ask` in your own `~/.claude/settings.json`. An `ask` in any file beats an `allow` in any other, so no repository setting can override it | Take it out of `ask` in your file |
+| You said "don't ask again", but it asks again | That answer went to `.claude/settings.local.json`, which is yours, ignored by git, and missing from every other repository and every new worktree | Put the rule in `~/.claude/settings.json`, or in the committed `.claude/settings.json` if the whole repository should share it |
+| A command you allowed still asks | It didn't match the rule's text: `git -C ../app push` doesn't match `git push *`, and in `git push && ./deploy.sh` every part must be allowed | Allow the form the agent uses, or ask it to run commands one at a time |
+| Tests or lint ask every time | The repository's check command isn't on the list | Allow it by name, such as `pnpm test` |
+| Codex asks for every commit and push | In `workspace-write`, `.git` is read-only | Add the git rule under [Codex](#codex) and restart Codex |
+
 ## Claude Code
 
 Settings live in three files, and their permission lists are combined:
