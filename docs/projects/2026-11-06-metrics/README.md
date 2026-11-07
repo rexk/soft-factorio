@@ -11,7 +11,10 @@ over time, with people and agents saying what they mean.
 |---|---|
 | Research: what similar tools measure | Done: [research.md](research.md) |
 | Product brief | Approved 2026-11-06: [product.html](product.html) |
-| Design brief | Written, awaiting the maintainer's pick of approach: [design.html](design.html). Recommends A2: one ledger per repository, in three stages |
+| Design brief | A2 picked 2026-11-06: [design.html](design.html). One ledger per repository, in three stages |
+| Stage 1: factory eval ledger, compare, readings | In progress |
+| Stage 2: numbers in adopting repositories | Not started |
+| Stage 3: optional quick answer at the retro's end-of-task step | Not started |
 
 ## Decided in the interview (2026-11-06)
 
@@ -61,14 +64,14 @@ The design brief got matching edits: T2, T10–T12, a new `metrics-N6`
 - Numbers never rank people, agents or repositories against each other
   (`metrics-X5`): extends "compare only against earlier versions".
 
-## Open
+## Decided
 
-- `metrics-Q1`: which approach (A1, A2 or A3).
-- `metrics-Q2`: where the quick answer is asked (stage 3 only).
+- `metrics-Q1` (2026-11-06): A2, the staged ledger.
+- `metrics-Q2` (2026-11-06): the quick answer is asked at the retro skill's
+  end-of-task step.
 
 ## Next
 
-1. Maintainer picks an approach in [design.html](design.html).
-2. Stage 1: the factory's eval ledger, compare and readings (one PR).
-3. Stage 2: numbers in adopting repositories (one PR).
-4. Stage 3: the optional quick answer (one PR, checked first).
+1. Stage 1: the factory's eval ledger, compare and readings (one PR).
+2. Stage 2: numbers in adopting repositories (one PR).
+3. Stage 3: the optional quick answer (one PR, checked first).
