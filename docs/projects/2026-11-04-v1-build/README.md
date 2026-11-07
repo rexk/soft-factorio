@@ -5,7 +5,8 @@ Key: `v1-build`
 Building v1 of the factory: approach A2 (start file, copied skills, a
 manifest, scenario evals). The product and design briefs are kept outside
 this repository; the behaviour lines (B1–B14) and scenarios (T1–T12) they
-define are mirrored in `evals/`.
+define are mirrored in `evals/`. B15 (update on request, T13) was added on
+2026-11-06 and still needs a line in the product brief.
 
 ## State
 
@@ -37,6 +38,7 @@ transcripts stay in the scratch folder.
 | T9 learn from corrections | B10 | 3/3 | 1/3 first; retro's Lessons table then gained a "why this stops it recurring" column and a row for every request |
 | T10 upstream only by consent | B11 | 3/3 | 3/3 again on the retro rule and the START.md change |
 | T11, T12 | B12, B14 | not built | |
+| T13 update on request | B15 | 3/3 | 2026-11-06. The person asks only "is there an update?" or "update the factory"; `update-factory` triggered by itself in every run |
 
 Known limits:
 - T4 covers T1 under Codex. Codex can't apply the factory headless (its
@@ -52,6 +54,15 @@ Known limits:
 
 ## Open
 
+- **T1 is below its rate on main (2026-11-06).** Smoke runs for T13's
+  change: T3 3/3, T10 3/3, T1 6/9 on the branch and 4/6 on main (the
+  commit before). Every failure is the same judge call: the product brief
+  names a storage mechanism ("blocked storage, private mode") or an app
+  shell. A gap in `outcome-brief` or a stricter judge than the skill; the
+  maintainer decides which. Not caused by `update-factory`.
+- Two `evals/run.py` calls started in the same second share one run folder
+  (named by a timestamp) and overwrite each other. Run batches one at a
+  time until the folder name is unique.
 - Does a product brief written in chat (not as a page) satisfy T1? The skill
   allows chat briefs for small asks; T1's code judge only accepts a page
   under `docs/`. A judge change, so the maintainer decides.
