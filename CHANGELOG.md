@@ -4,6 +4,16 @@ Newest first. The factory has no release tags: a repository records the
 commit it installed, and an update lists the factory's commits since then.
 This file is the short, human summary.
 
+## 2026-11-06
+
+- Eval ledger (`evals/ledger.jsonl`): every eval pass and `--calibrate`
+  appends its numbers with the factory version they measured, including
+  turns and skills used per run. Starts with the v1 build's passes of
+  2026-11-05, their notes kept as readings.
+- `tools/metrics.py`: `compare` puts versions side by side as JSON, or as a
+  page with `--html`; `add-reading` records what someone thinks the numbers
+  mean. No scores, verdicts or gates.
+
 ## 2026-11-04
 
 - `START.md`: the steps an agent follows to apply or update the factory.
