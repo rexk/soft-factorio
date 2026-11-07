@@ -23,10 +23,7 @@ repository's own rules outside this block win over it.
   what gets built, or before sending anything outside the repository. If a
   step can't run, such as checks that need an install, say so and keep going:
   ship a draft that names what didn't run. Report progress as you go; don't
-  ask leave to continue. If the harness stops a step these rules say needs no
-  approval, such as a push, tell the person the first time, name the setting
-  if you can see it and point to `harness-settings.md`. Don't change it
-  yourself.
+  ask leave to continue.
 - **Test behaviour.** Tests prove what the code does for its users, fail when
   that breaks and survive a refactor. Never assert only that a field exists
   or a function was called.
