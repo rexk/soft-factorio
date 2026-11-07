@@ -81,10 +81,7 @@ def snapshot(name: str, dest: Path) -> Path:
     if local and (local / ".git").exists():
         source = local  # a local copy next to the factory; only read, never written
     else:
-        source = workdir() / "cache" / f"{name}@{spec['commit'][:12]}"
-        if not source.exists():
-            source.parent.mkdir(parents=True, exist_ok=True)
-            sh(["git", "clone", "--quiet", spec["url"], str(source)])
+        source = cached_clone(spec["url"], workdir() / "cache" / f"{name}@{spec['commit'][:12]}")
     if dest.exists():
         shutil.rmtree(dest)
     sh(["git", "clone", "--quiet", "--no-hardlinks", str(source), str(dest)])
@@ -94,6 +91,37 @@ def snapshot(name: str, dest: Path) -> Path:
     git(dest, "config", "user.name", "eval-runner")
     git(dest, "config", "user.email", "eval-runner@invalid")
     return dest
+
+
+_cache_locks: dict[Path, threading.Lock] = {}
+_cache_locks_guard = threading.Lock()
+
+
+def cached_clone(url: str, entry: Path) -> Path:
+    """Clone url into the cache folder entry once, safely under parallel runs.
+
+    Threads asking for the same entry wait on one lock, so only one clones.
+    The clone goes to a temporary sibling and is renamed into place, so the
+    entry never holds a half-made clone, and another process that got there
+    first counts as success.
+    """
+    with _cache_locks_guard:
+        lock = _cache_locks.setdefault(entry, threading.Lock())
+    with lock:
+        if entry.exists():
+            return entry
+        entry.parent.mkdir(parents=True, exist_ok=True)
+        tmp = Path(tempfile.mkdtemp(dir=entry.parent, prefix=f".{entry.name}."))
+        try:
+            sh(["git", "clone", "--quiet", url, str(tmp)])
+            try:
+                tmp.rename(entry)
+            except OSError:
+                if not entry.exists():  # not a lost race: a real failure
+                    raise
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+    return entry
 
 
 def guard_pushes(repo: Path) -> None:
@@ -203,7 +231,13 @@ def use_tool(name: str) -> None:
     _tool.name = name
 
 
+def agents_started() -> int:
+    """How many agent runs this thread has started, to tell setup errors apart."""
+    return getattr(_tool, "started", 0)
+
+
 def run_agent(repo: Path, prompt: str, log: Path, model: str, budget_usd: float = 5.0, **kw) -> "AgentRun":
+    _tool.started = agents_started() + 1
     if getattr(_tool, "name", "claude") == "codex":
         return run_codex(repo, prompt, log, **kw)
     return run_claude(repo, prompt, log, model, budget_usd, **kw)
