@@ -10,7 +10,8 @@ disagrees with any sample isn't trusted.
 
 Each run gets its own snapshot of the scenario's repository in a scratch
 folder (FACTORY_EVAL_DIR, default: the system temp dir). Results land in
-<scratch>/results/<timestamp>/ as one JSON per run plus summary.json.
+<scratch>/results/<timestamp>/ as one JSON per run plus summary.json; a batch
+started in the same second as another gets <timestamp>.2 and so on.
 """
 
 from __future__ import annotations
@@ -59,7 +60,7 @@ def main() -> int:
     if args.calibrate:
         return calibrate(args.scenarios)
 
-    stamp = time.strftime("%Y%m%d-%H%M%S") + "-" + "-".join(args.scenarios)
+    stamp = lib.claim_batch(time.strftime("%Y%m%d-%H%M%S") + "-" + "-".join(args.scenarios))
     out = lib.workdir() / "results" / stamp
     jobs = []
     for sid in args.scenarios:
