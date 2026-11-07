@@ -56,7 +56,7 @@ footer{font:12px/1.4 var(--mono);color:var(--muted);border-top:1px solid var(--l
     <div class="meta"><span>Key: buildable-briefs</span><span>Date: <time datetime="2026-10-27">2026-10-27</time></span><span>Author: an agent, with the maintainer</span><span>Status: example product brief</span><span>Source: the maintainer's answers in chat</span></div>
   </header>
 
-  <p class="takeaway">Example product brief for the outcome-brief skill itself. The maintainer states what they want once, at a high level, and an agent turns it into a brief clear enough that a builder never has to come back to them.</p>
+  <p class="takeaway">Example product brief for the outcome-brief skill itself. The maintainer states what they want once, at a high level, and an agent turns it into a brief clear enough that a builder never has to come back to them, without the shortcuts that would undo it.</p>
 
   <section id="value">
     <h2>Value</h2>
@@ -72,13 +72,23 @@ footer{font:12px/1.4 var(--mono);color:var(--muted);border-top:1px solid var(--l
       <thead><tr><th>ID</th><th>Behaviour</th></tr></thead>
       <tbody>
         <tr id="b1"><td><b>B1</b></td><td>Given a vague ask, the agent asks before building, and every decision comes with options, their evidence and a recommendation.</td></tr>
-        <tr id="b2"><td><b>B2</b></td><td>The product brief is one HTML page holding value and behaviour only.</td></tr>
+        <tr id="b2"><td><b>B2</b></td><td>The product brief is one HTML page holding value, behaviour and must-nots only.</td></tr>
         <tr id="b3"><td><b>B3</b></td><td>Every behaviour line is something a test can observe.</td></tr>
         <tr id="b4"><td><b>B4</b></td><td>Nothing is built before the product brief is approved.</td></tr>
         <tr id="b5"><td><b>B5</b></td><td>The skill loads in Claude Code, Codex and Cursor from one copy.</td></tr>
       </tbody>
     </table></div>
-    <p>Bounds, approaches and the agent's own calls are in the design brief.</p>
+  </section>
+  <section id="must-not">
+    <h2>Must not</h2>
+    <div class="scroll"><table>
+      <thead><tr><th>ID</th><th>Never</th></tr></thead>
+      <tbody>
+        <tr id="x1"><td><b>X1</b></td><td>The agent never asks the maintainer for a fact the repository already holds.</td></tr>
+        <tr id="x2"><td><b>X2</b></td><td>A builder never weakens or skips a test to make a behaviour line pass; it says the line can't be met.</td></tr>
+      </tbody>
+    </table></div>
+    <p>Bounds, not-now scope, approaches and the agent's own calls are in the design brief.</p>
   </section>
   <footer>Composed 2026-10-27 by an agent using outcome-brief and html-for-humans, from the maintainer's chat answers.</footer>
 </main>
