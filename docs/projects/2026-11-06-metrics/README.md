@@ -10,8 +10,8 @@ over time, with people and agents saying what they mean.
 | Step | State |
 |---|---|
 | Research: what similar tools measure | Done: [research.md](research.md) |
-| Product brief | Written, awaiting the maintainer's approval: [product.html](product.html) |
-| Design brief | Not started; waits for the product brief's approval |
+| Product brief | Approved 2026-11-06: [product.html](product.html) |
+| Design brief | Written, awaiting the maintainer's pick of approach: [design.html](design.html). Recommends A2: one ledger per repository, in three stages |
 
 ## Decided in the interview (2026-11-06)
 
@@ -43,15 +43,14 @@ over time, with people and agents saying what they mean.
 - Numbers never rank people, agents or repositories against each other
   (`metrics-X5`): extends "compare only against earlier versions".
 
-## Carried to the design brief
+## Open
 
-- Which numbers to start with: research.md proposes a starting set.
-- Where numbers and readings are kept, and in what form.
-- Where people see the comparison, and how the quick answer is asked.
-- How noisy numbers (few runs) are shown next to each other.
+- `metrics-Q1`: which approach (A1, A2 or A3).
+- `metrics-Q2`: where the quick answer is asked (stage 3 only).
 
 ## Next
 
-1. Maintainer approves or corrects the product brief.
-2. Design brief: approaches for recording, comparing and reading, factory
-   evals first.
+1. Maintainer picks an approach in [design.html](design.html).
+2. Stage 1: the factory's eval ledger, compare and readings (one PR).
+3. Stage 2: numbers in adopting repositories (one PR).
+4. Stage 3: the optional quick answer (one PR, checked first).
