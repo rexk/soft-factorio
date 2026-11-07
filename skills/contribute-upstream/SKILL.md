@@ -17,9 +17,8 @@ repository. On a no, nothing was sent.
    sending lessons.
 2. **Draft the lesson** using the factory's lesson layout: what happened,
    the evidence that showed it (or "none", said plainly; don't invent
-   any), the lesson in one or two sentences, the change you'd propose to the
-   factory (which skill, guide or rule, and what it would say), and the
-   factory version from `.agents/factory/manifest.json`.
+   any), the lesson in one or two sentences, and the change you'd propose to
+   the factory (which skill, guide or rule, and what it would say).
    - **Strip everything private to this repository:** its name, people's
      names, company or product names, file paths, code, URLs, and anything
      the person called confidential. Describe the situation in general

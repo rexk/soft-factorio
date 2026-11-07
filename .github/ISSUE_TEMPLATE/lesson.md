@@ -23,7 +23,3 @@ to reproduce it rather than guess. -->
 
 <!-- Where it belongs in the factory: a skill, a guide, the rules block or a
 scenario. What it would say, and why that would have prevented this. -->
-
-## Factory version
-
-<!-- From the repository's .agents/factory/manifest. -->
