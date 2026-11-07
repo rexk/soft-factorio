@@ -74,12 +74,16 @@ def main() -> int:
         logdir = out / name
         logdir.mkdir(parents=True, exist_ok=True)
         t0 = time.time()
+        started = lib.agents_started()
         try:
             res = mod.run(lib.workdir() / "runs" / stamp / name, arm, logdir, args.model)
         except lib.UsageLimit as e:  # cut short by the account, not judged: void
-            res = {"pass": None, "void": str(e)}
-        except Exception as e:  # a crashed run is a failed run, with the reason kept
-            res = {"pass": False, "error": repr(e)}
+            res = {"pass": None, "void": f"usage limit: {e}"}
+        except Exception as e:
+            if lib.agents_started() == started:  # setup broke before any agent ran: void
+                res = {"pass": None, "void": f"setup error: {e!r}"}
+            else:  # a crashed run is a failed run, with the reason kept
+                res = {"pass": False, "error": repr(e)}
         res.update(scenario=sid, arm=arm, run=i, seconds=round(time.time() - t0))
         (logdir / "result.json").write_text(json.dumps(res, indent=2))
         verdict = "VOID" if res["pass"] is None else "PASS" if res["pass"] else "FAIL"
@@ -106,7 +110,7 @@ def main() -> int:
     print(f"\nResults: {out}")
     for key, s in summary.items():
         if s["void"]:
-            print(f"  {key}: {s['passed']}/{s['runs']}, {s['void']} void (usage limit): rerun")
+            print(f"  {key}: {s['passed']}/{s['runs']}, {s['void']} void (see result.json): rerun")
             continue
         verdict = "meets" if s["meets_rate"] else "below"
         print(f"  {key}: {s['passed']}/{s['runs']} ({verdict} its rate of {s['rate']:.0%})")
