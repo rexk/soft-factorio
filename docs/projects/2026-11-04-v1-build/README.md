@@ -27,7 +27,7 @@ transcripts stay in the scratch folder.
 
 | Scenario | Behaviour | Result | Notes |
 |---|---|---|---|
-| T1 apply, then a vague ask | B1, B6 | 3/3 | agent applies the factory itself; 3/3 again on the retro rule and the START.md change |
+| T1 apply, then a vague ask | B1, B6 | 3/3 | agent applies the factory itself; 3/3 again on the retro rule and the START.md change. Fell to 4/6 on 2026-11-06 (briefs carried the agent's how-calls); 6/6 after `outcome-brief` sorted calls into the brief line they shape or the design brief (#9) |
 | T2 repo rules win | B2 | 3/3 | apply arm |
 | T3 update keeps local choices | B3 | 3/3 | 3/3 again after START.md began pointing to the settings guide. 2/3 first: the eval had no test runner on its allow-list, so the agent stopped before shipping; test commands now allowed |
 | T4 same in Codex (T1, preinstalled) | B4 | 3/3 | |
@@ -54,18 +54,12 @@ Known limits:
 
 ## Open
 
-- **T1 is below its rate on main (2026-11-06).** Smoke runs for T13's
-  change: T3 3/3, T10 3/3, T1 6/9 on the branch and 4/6 on main (the
-  commit before). Every failure is the same judge call: the product brief
-  names a storage mechanism ("blocked storage, private mode") or an app
-  shell. A gap in `outcome-brief` or a stricter judge than the skill; the
-  maintainer decides which. Not caused by `update-factory`.
-- Two `evals/run.py` calls started in the same second share one run folder
-  (named by a timestamp) and overwrite each other. Run batches one at a
-  time until the folder name is unique.
 - Does a product brief written in chat (not as a page) satisfy T1? The skill
   allows chat briefs for small asks; T1's code judge only accepts a page
   under `docs/`. A judge change, so the maintainer decides.
+- T1's judge reads every `docs/` page, so the project's README state file
+  counts as brief too. If runs fail on README content, judge only
+  `product.html`? A scenario change, so the maintainer decides (#9).
 - Take `Bash(git push:*)` off the `ask` list in the maintainer's own Claude
   Code settings, so pushes stop prompting (retro Q1)? The maintainer's call.
 - A headless browser for T6's render check; Codex outside its sandbox for

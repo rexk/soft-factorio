@@ -20,6 +20,9 @@ request.
   factory version.
 - The harness settings guide explains why the harness keeps asking for
   approval, with fixes.
+- `outcome-brief`: the product brief holds value and behaviour only. A call
+  the agent makes for the person goes on the line it shapes, marked "my
+  call"; a call about how goes to the design brief.
 
 ## 2026-11-05
 
