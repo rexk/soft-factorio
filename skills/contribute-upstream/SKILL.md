@@ -16,7 +16,8 @@ repository. On a no, nothing was sent.
    `upstream: yes`. If it says anything else, stop and say nothing about
    sending lessons.
 2. **Draft the lesson** using the factory's lesson layout: what happened,
-   the lesson in one or two sentences, the change you'd propose to the
+   the evidence that showed it (or "none", said plainly; don't invent
+   any), the lesson in one or two sentences, the change you'd propose to the
    factory (which skill, guide or rule, and what it would say), and the
    factory version from `.agents/factory/manifest.json`.
    - **Strip everything private to this repository:** its name, people's
