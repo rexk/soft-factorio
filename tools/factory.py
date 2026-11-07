@@ -81,12 +81,20 @@ def git_out(repo: Path, *args: str) -> str | None:
     return r.stdout.strip() if r.returncode == 0 else None
 
 
+# The eval ledger (tools/metrics.py) grows with every eval pass. It records the
+# factory's versions rather than being part of them, so an uncommitted ledger
+# doesn't make a checkout count as modified.
+LEDGER = "evals/ledger.jsonl"
+NOT_FACTORY_TEXT = f":(top,exclude){LEDGER}"
+
+
 def factory_version(factory: Path) -> str:
     """The factory's commit; `-modified` if its checkout has uncommitted changes."""
     sha = git_out(factory, "rev-parse", "--short=12", "HEAD")
     if not sha:
         return "unversioned"
-    return f"{sha}-modified" if git_out(factory, "status", "--porcelain") else sha
+    dirty = git_out(factory, "status", "--porcelain", "--", NOT_FACTORY_TEXT)
+    return f"{sha}-modified" if dirty else sha
 
 
 def factory_source(factory: Path) -> str:

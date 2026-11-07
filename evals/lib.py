@@ -239,8 +239,35 @@ def agents_started() -> int:
 def run_agent(repo: Path, prompt: str, log: Path, model: str, budget_usd: float = 5.0, **kw) -> "AgentRun":
     _tool.started = agents_started() + 1
     if getattr(_tool, "name", "claude") == "codex":
-        return run_codex(repo, prompt, log, **kw)
-    return run_claude(repo, prompt, log, model, budget_usd, **kw)
+        run = run_codex(repo, prompt, log, **kw)
+        sessions().append(None)  # Codex's turns and skills aren't read: not recorded
+        return run
+    run = run_claude(repo, prompt, log, model, budget_usd, **kw)
+    sessions().append(run)
+    return run
+
+
+def sessions() -> list:
+    """The agent sessions this thread ran since reset_sessions(), for the ledger.
+
+    Each is an AgentRun, or None for a session whose turns and skills aren't known.
+    """
+    if not hasattr(_tool, "sessions"):
+        _tool.sessions = []
+    return _tool.sessions
+
+
+def reset_sessions() -> None:
+    _tool.sessions = []
+
+
+def session_numbers() -> dict:
+    """Turns and skills used across this thread's sessions; None where not known."""
+    runs = sessions()
+    if not runs or any(r is None for r in runs):
+        return {"agent_turns": None, "agent_skills": None}
+    return {"agent_turns": sum(r.turns for r in runs),
+            "agent_skills": sorted({s for r in runs for s in r.skills_used if s})}
 
 
 def codex_home() -> Path:
