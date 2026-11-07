@@ -48,7 +48,9 @@ Settings live in three files, and their permission lists are combined:
 
 Rules are checked in the order **deny, then ask, then allow**, and the first
 match wins. So a `git push` rule under `ask` prompts even when `allow` has
-one too: take it out of `ask` rather than adding to `allow`.
+one too: take it out of `ask` rather than adding to `allow`. That holds
+across files: an `ask` in your own `~/.claude/settings.json` beats an
+`allow` the repository commits, and only you can remove it.
 
 ```json
 {
