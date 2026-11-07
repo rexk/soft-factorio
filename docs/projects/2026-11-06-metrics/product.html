@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Anyone can see whether the factory works better than before, and say what the numbers mean</title>
+<style>
+/* Tokens: change values here only. Light first, dark redefines the same names. */
+:root{
+  --bg:#f4f5f7; --surface:#ffffff; --fg:#1a1f27; --muted:#5d6672; --line:#d6dae0;
+  --accent:#2f5fd0; --accent-soft:#e6ecfb;
+  --ok:#1d7a46; --warn:#9a6200; --bad:#b3261e;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+/* Dark: follows the OS unless the viewer picked light; data-theme="dark" forces it. */
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#12161b; --surface:#1b2027; --fg:#e6e9ed; --muted:#9aa3ae; --line:#2e3540;
+  --accent:#7ea2ff; --accent-soft:#1f2a44;
+  --ok:#5cc98c; --warn:#e7b04f; --bad:#ff8a80;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12161b; --surface:#1b2027; --fg:#e6e9ed; --muted:#9aa3ae; --line:#2e3540;
+  --accent:#7ea2ff; --accent-soft:#1f2a44;
+  --ok:#5cc98c; --warn:#e7b04f; --bad:#ff8a80;
+  color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 var(--sans)}
+main{max-width:720px;margin:0 auto;padding:24px 16px 48px;display:flex;flex-direction:column;gap:28px}
+h1{font-size:1.6rem;line-height:1.2;margin:0;text-wrap:balance}
+h2{font-size:1.15rem;margin:0 0 8px}
+h3{font-size:1rem;margin:16px 0 4px}
+p{margin:0 0 8px}
+ul{margin:0;padding-left:1.2em}
+li{margin:0 0 4px}
+.meta{font:13px/1.4 var(--mono);color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:8px}
+.takeaway{background:var(--accent-soft);border-left:4px solid var(--accent);padding:12px 14px;border-radius:0 6px 6px 0;font-weight:600}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:.8rem;text-transform:uppercase;letter-spacing:.04em}
+td:first-child{white-space:nowrap}
+.note{display:block;color:var(--muted);font-size:.85rem;margin-top:2px}
+figure{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px}
+figure svg{display:block;width:100%;height:auto}
+figcaption{font-size:.9rem;color:var(--muted);margin-top:8px}
+figcaption b{color:var(--fg)}
+details{margin-top:6px} summary{cursor:pointer}
+summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+footer{font:12px/1.4 var(--mono);color:var(--muted);border-top:1px solid var(--line);padding-top:10px}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Anyone can see whether the factory works better than before, and say what the numbers mean</h1>
+    <div class="meta"><span>Key: metrics</span><span>Date: <time datetime="2026-11-06">2026-11-06</time></span><span>Author: an agent, with the maintainer</span><span>Status: product brief, awaiting approval</span><span>Source: the maintainer's words and answers in chat; <a href="research.md">research.md</a></span></div>
+  </header>
+
+  <p class="takeaway">The factory keeps a few rough numbers for each version and shows them next to earlier versions. People and agents read them and record what they think they mean. That gives us evidence, not only a feeling, that a change made things better or worse.</p>
+
+  <section id="value">
+    <h2>Value</h2>
+    <p id="v0"><b>V0.</b> The factory's maintainer, the agents that work on it, and the authors of repositories that use it can see whether it is working better or worse than before. They get numbers that are compared over time, and they decide for themselves what the numbers mean.</p>
+    <ul>
+      <li id="v1"><b>V1.</b> Evidence, not only a feeling: a change to a skill, rule or guide can be checked against the numbers from the version before it.</li>
+      <li id="v2"><b>V2.</b> Rough numbers are fine. A number that is easy to get, even an ambiguous one, earns its place by being comparable over time, not by being precise.</li>
+      <li id="v3"><b>V3.</b> The meaning stays with the reader. The numbers carry no verdict, and each person or agent writes their own reading of them.</li>
+      <li id="v4"><b>V4.</b> How it felt sits next to what was measured, so we can see when the two disagree.</li>
+      <li id="v5"><b>V5.</b> Safe to adopt: a repository's numbers are kept in that repository and sent nowhere else.</li>
+    </ul>
+  </section>
+
+  <section id="behaviour">
+    <h2>Behaviour</h2>
+    <figure>
+      <svg viewBox="0 0 400 96" role="img" aria-labelledby="f1cap">
+        <g font-size="15" font-family="var(--sans)">
+          <rect x="2" y="16" width="112" height="52" rx="6" fill="var(--accent-soft)" stroke="var(--accent)"/>
+          <text x="58" y="40" text-anchor="middle" fill="var(--fg)" font-weight="600">Record</text>
+          <text x="58" y="58" text-anchor="middle" fill="var(--muted)" font-size="13">B1–B4</text>
+          <rect x="144" y="16" width="112" height="52" rx="6" fill="var(--accent-soft)" stroke="var(--accent)"/>
+          <text x="200" y="40" text-anchor="middle" fill="var(--fg)" font-weight="600">Compare</text>
+          <text x="200" y="58" text-anchor="middle" fill="var(--muted)" font-size="13">B5–B6</text>
+          <rect x="286" y="16" width="112" height="52" rx="6" fill="var(--accent-soft)" stroke="var(--accent)"/>
+          <text x="342" y="40" text-anchor="middle" fill="var(--fg)" font-weight="600">Interpret</text>
+          <text x="342" y="58" text-anchor="middle" fill="var(--muted)" font-size="13">B7–B9</text>
+        </g>
+        <g stroke="var(--muted)" stroke-width="1.5" fill="var(--muted)">
+          <line x1="116" y1="42" x2="136" y2="42"/><path d="M136 37 L143 42 L136 47 Z" stroke="none"/>
+          <line x1="258" y1="42" x2="278" y2="42"/><path d="M278 37 L285 42 L278 47 Z" stroke="none"/>
+        </g>
+        <text x="200" y="90" text-anchor="middle" fill="var(--muted)" font-size="13" font-family="var(--sans)">B10 throughout: nothing leaves the repository</text>
+      </svg>
+      <figcaption id="f1cap"><b>Numbers are recorded for each version, compared with earlier versions, then interpreted by people and agents.</b>
+        <details><summary>Groups</summary>Record: B1–B4 · Compare: B5–B6 · Interpret: B7–B9 · Throughout: B10</details>
+      </figcaption>
+    </figure>
+
+    <h3 id="g-record">Record</h3>
+    <div class="scroll"><table>
+      <thead><tr><th>ID</th><th>Behaviour</th></tr></thead>
+      <tbody>
+        <tr id="b1"><td><b>B1</b></td><td>After an eval pass, its numbers (such as how often each scenario passed, what it cost, how long it took) are kept with the factory version they measured, and the numbers from earlier passes are still there.<span class="note">Covers every scenario and every arm that ran. A pass on a change that hasn't landed yet is kept too, so a change can be checked before it lands.</span></td></tr>
+        <tr id="b2"><td><b>B2</b></td><td>In a repository that uses the factory, anyone can get that repository's numbers (such as how its agents' pull requests fared, and how often people had to correct the agent) for each factory version it has had. The numbers come from what the repository already holds, such as its history and pull requests, so nothing needs switching on beforehand.</td></tr>
+        <tr id="b3"><td><b>B3</b></td><td>Every number shows what it counts, where it came from, and how many runs or tasks it rests on, so a reader can judge how much to trust it.</td></tr>
+        <tr id="b4"><td><b>B4</b></td><td>When an agent's task ends, the person who asked for it can give a quick answer on how it went. The answer is kept next to that task's numbers. Skipping it changes nothing else.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3 id="g-compare">Compare</h3>
+    <div class="scroll"><table>
+      <thead><tr><th>ID</th><th>Behaviour</th></tr></thead>
+      <tbody>
+        <tr id="b5"><td><b>B5</b></td><td>Anyone can see one version's numbers next to earlier versions' numbers, with the change between them shown.<span class="note">For the factory, a version is a state of the factory, released or not. For a repository, it is a factory version the repository has applied.</span></td></tr>
+        <tr id="b6"><td><b>B6</b></td><td>A number that a version doesn't have shows as missing, never as zero. That includes a kind of number added later: older versions show it as missing, and their other numbers still compare.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3 id="g-interpret">Interpret</h3>
+    <div class="scroll"><table>
+      <thead><tr><th>ID</th><th>Behaviour</th></tr></thead>
+      <tbody>
+        <tr id="b7"><td><b>B7</b></td><td>The numbers come with no verdict: no "good" or "bad", no overall score, no pass mark of their own.</td></tr>
+        <tr id="b8"><td><b>B8</b></td><td>A person or an agent can write down their reading of a comparison. It is kept with the numbers it refers to, along with who wrote it and when. Several readings can sit side by side, and a new reading never replaces an earlier one.<span class="note">The maintainer, agents, and the authors of each adopting repository can all add readings.</span></td></tr>
+        <tr id="b9"><td><b>B9</b></td><td>An agent can read the numbers and the earlier readings as plain, machine-readable data.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3 id="g-throughout">Throughout</h3>
+    <div class="scroll"><table>
+      <thead><tr><th>ID</th><th>Behaviour</th></tr></thead>
+      <tbody>
+        <tr id="b10"><td><b>B10</b></td><td>Numbers, quick answers and readings about a repository stay in that repository. Nothing is sent to the factory or anywhere else.</td></tr>
+      </tbody>
+    </table></div>
+    <p>Which numbers to start with, the order to build in (the factory's own evals first), and every question of how all belong in the design brief.</p>
+  </section>
+
+  <footer>Composed 2026-11-06 by an agent using outcome-brief and html-for-humans, from the maintainer's words and interview answers in chat and from research.md in this folder.</footer>
+</main>
+</body>
+</html>
