@@ -5,6 +5,8 @@
     python3 .agents/skills/metrics/metrics.py compare [VERSION ...] [--html [PATH]]
     python3 .agents/skills/metrics/metrics.py add-reading --about VERSION [VERSION ...] \\
         --author WHO --text TEXT
+    python3 .agents/skills/metrics/metrics.py add-answer [--pr N] \\
+        [--stepped-in CHOICE] [--take-as-is CHOICE] [--note TEXT]
 
 Every command also takes --repo PATH (default: the repository you are in)
 and --ref REF (the history to read, default HEAD). compare also takes
@@ -21,9 +23,12 @@ so nothing needs switching on first:
   corrections   the retro skill's Lessons tables in agent pull requests.
   reverts       "This reverts commit ..." in the git history.
 
-Only readings are stored: add-reading appends them to
-.agents/metrics/ledger.jsonl, committed with the repository and never
-rewritten. `compare` prints JSON; `--html` also writes a page (default
+Only readings and quick answers are stored: add-reading and add-answer
+append them to .agents/metrics/ledger.jsonl, committed with the repository
+and never rewritten. A quick answer is what the person who asked for a task
+said about it when it ended (the retro skill asks). compare lists each one
+beside its pull request's own numbers, as given: answers are never counted
+into the numbers, summed or scored. `compare` prints JSON; `--html` also writes a page (default
 .scratch/metrics/repository.html, kept out of git).
 
 The numbers carry no verdict. Nothing here scores, ranks, passes or fails a
@@ -46,8 +51,8 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from metrics_ledger import (append, cell, compare_rows, inside, mean, median,  # noqa: E402
-                            now, read, reading, readings_about, render, select)
+from metrics_ledger import (MAX_READING, append, cell, compare_rows, fmt, inside,  # noqa: E402
+                            mean, median, now, read, reading, readings_about, render, select)
 
 MANIFEST = ".agents/factory/manifest.json"
 LEDGER = ".agents/metrics/ledger.jsonl"
@@ -92,6 +97,11 @@ DEFINITIONS = {
 GROUP_OF = {m: HISTORY if m == "revert_commits" else LESSONS if "lessons" in m or "correction" in m else PRS
             for m in DEFINITIONS}
 ABSENT = "not computed for this version"
+
+# B4: the retro skill's end-of-task question, and the only answers it takes.
+QUESTIONS = {"stepped_in": "How much did you have to step in?",
+             "take_as_is": "Would you take this pull request as is?"}
+CHOICES = {"stepped_in": ("none", "some", "a lot"), "take_as_is": ("yes", "with edits", "no")}
 
 
 # --------------------------------------------------------------------- git
@@ -271,6 +281,20 @@ def reverts_in(commits: list[dict]) -> list[tuple[str, datetime.datetime]]:
             for m in re.finditer(r"This reverts commit ([0-9a-f]{7,40})", c["message"])]
 
 
+def review_rounds(p: dict) -> int:
+    """Reviews that requested changes or commented before the merge (or so far, if not merged)."""
+    end = when(p["mergedAt"]) if p.get("mergedAt") else None
+    return sum(1 for r in p.get("reviews") or []
+               if r.get("state") in ("CHANGES_REQUESTED", "COMMENTED")
+               and (end is None or not r.get("submittedAt") or when(r["submittedAt"]) <= end))
+
+
+def hours_to_merge(p: dict) -> float | None:
+    if not (p.get("mergedAt") and p.get("createdAt")):
+        return None
+    return (when(p["mergedAt"]) - when(p["createdAt"])).total_seconds() / 3600
+
+
 def numbers_of(version: dict, prs: list | None, pr_source: str, commits: list[dict],
                branches: tuple, ref: str) -> dict[str, dict]:
     """Group -> metric -> cell, for one version."""
@@ -297,13 +321,7 @@ def numbers_of(version: dict, prs: list | None, pr_source: str, commits: list[di
     src = (f"{pr_source}; {agent_rule(branches)}; opened {period}: "
            f"{listed([p['number'] for p in agent])}")
 
-    def rounds(p):
-        merged_at = when(p["mergedAt"])
-        return sum(1 for r in p.get("reviews") or []
-                   if r.get("state") in ("CHANGES_REQUESTED", "COMMENTED")
-                   and (not r.get("submittedAt") or when(r["submittedAt"]) <= merged_at))
-
-    hours = [(when(p["mergedAt"]) - when(p["createdAt"])).total_seconds() / 3600 for p in merged]
+    hours = [hours_to_merge(p) for p in merged]
     with_sha = [p for p in merged if (p.get("mergeCommit") or {}).get("oid")]
 
     def reverted(p):
@@ -317,7 +335,7 @@ def numbers_of(version: dict, prs: list | None, pr_source: str, commits: list[di
         "agent_prs_closed_unmerged": cell(len(closed), len(agent), src),
         "agent_prs_still_open": cell(len(still), len(agent), src),
         "agent_pr_merge_rate": cell(len(merged) / decided if decided else None, decided, src),
-        "review_rounds_per_merged_pr": cell(mean([rounds(p) for p in merged]), len(merged), src),
+        "review_rounds_per_merged_pr": cell(mean([review_rounds(p) for p in merged]), len(merged), src),
         "hours_to_merge_median": cell(median(hours), len(merged), src, 1),
         "reverted_within_14_days": cell(sum(map(reverted, with_sha)) if with_sha else None, len(with_sha),
                                         f"{src}; reverts from git log {ref}"),
@@ -335,13 +353,102 @@ def numbers_of(version: dict, prs: list | None, pr_source: str, commits: list[di
     return out
 
 
+# ----------------------------------------------------------- quick answers
+
+TASK_NUMBERS = {
+    "state": "What happened to the pull request: merged, closed without merging, or open.",
+    "review_rounds": "Reviews that requested changes or left comments before the merge (so far, if it "
+                     "isn't merged). Approvals are not counted.",
+    "hours_to_merge": "Hours from opening to merging; missing if it isn't merged.",
+    "corrections": "Rows in the Lessons table of its description; missing when it has no table.",
+}
+
+
+def answer(pr: int | None, branch: str | None, given: dict, note: str | None, ref: str) -> dict:
+    """A quick answer entry, checked: at least one question answered, each with one of its choices."""
+    given = {q: c.strip().lower() for q, c in given.items() if c is not None}
+    asked = "; ".join(f"{QUESTIONS[q]} ({' / '.join(CHOICES[q])})" for q in QUESTIONS)
+    if not given:
+        raise ValueError(f"an answer needs a choice for at least one question: {asked}")
+    for q, c in given.items():
+        if c not in CHOICES[q]:
+            raise ValueError(f"{QUESTIONS[q]} takes {' / '.join(CHOICES[q])}, not {c!r}")
+    if pr is None and not branch:
+        raise ValueError("say which task the answer is about: --pr N, or run it on the task's branch")
+    entry = {"kind": "answer", "date": now(), "ref": ref}
+    if pr is not None:
+        entry["pr"] = pr
+    if branch:
+        entry["branch"] = branch
+    entry.update((q, given[q]) for q in QUESTIONS if q in given)
+    if note and note.strip():
+        if len(note.strip()) > MAX_READING:
+            raise ValueError(f"a note is short: {len(note.strip())} characters, keep it under {MAX_READING}")
+        entry["note"] = note.strip()
+    return entry
+
+
+def version_at(all_versions: list[dict], t: datetime.datetime) -> str | None:
+    return next((v["version"] for v in all_versions if within(t, spans_of(v))), None)
+
+
+def task_of(p: dict) -> dict:
+    """One pull request's own numbers (TASK_NUMBERS), the ones an answer sits beside."""
+    rows, hours = lessons(p.get("body")), hours_to_merge(p)
+    state = ("merged" if p.get("mergedAt") else
+             "closed without merging" if p.get("state") == "CLOSED" else "open")
+    return {"pr": p["number"], "opened": p.get("createdAt"), "state": state,
+            "review_rounds": review_rounds(p),
+            "hours_to_merge": round(hours, 1) if hours is not None else None,
+            "corrections": len(rows) if rows is not None else None}
+
+
+def answers_beside(entries: list[dict], prs: list | None, pr_source: str,
+                   all_versions: list[dict], keys: list[str]) -> list[dict]:
+    """B4: each quick answer, as given, beside its task's pull request and that pull request's numbers.
+
+    An answer names its pull request, or the branch it was recorded on. It
+    belongs to the version that pull request was opened in, like the
+    numbers; without the pull request, to the version it was recorded in.
+    Answers are listed oldest first, one by one: never counted, summed or
+    grouped by who gave them.
+    """
+    out = []
+    for a in entries:
+        if a.get("kind") != "answer" or not a.get("date"):
+            continue
+        if a.get("pr") is not None:
+            hits = [p for p in prs or [] if p.get("number") == a["pr"]]
+            wanted = f"#{a['pr']}"
+        else:
+            hits = [p for p in prs or [] if a.get("branch") and p.get("headRefName") == a["branch"]]
+            wanted = f"from the branch {a.get('branch')}"
+        p = max(hits, key=lambda q: q["number"]) if hits else None
+        if p and p.get("createdAt"):
+            version = version_at(all_versions, when(p["createdAt"]))
+            source = f"pull request #{p['number']} from {pr_source}: the version it was opened in"
+        else:
+            version = version_at(all_versions, when(a["date"]))
+            why = pr_source if prs is None else f"no pull request {wanted} in {pr_source}"
+            source = f"the version the answer was recorded in ({why})"
+        if version not in keys:
+            continue
+        out.append({"date": a["date"], "pr": a.get("pr", p["number"] if p else None),
+                    "branch": a.get("branch"), "version": version,
+                    **{q: a.get(q) for q in QUESTIONS}, "note": a.get("note"),
+                    "task": task_of(p) if p else None, "source": source})
+    return out
+
+
 def compare(repo: Path, ref: str = "HEAD", wanted: list[str] | None = None,
             branches: tuple = AGENT_BRANCHES, limit: int = PR_LIMIT) -> dict:
     """Each chosen version's numbers next to the others', with the changes between them."""
     commits = commits_of(repo, ref)
-    chosen = select(versions(repo, ref, commits), wanted or [])
+    all_versions = versions(repo, ref, commits)
+    chosen = select(all_versions, wanted or [])
     prs, pr_source = pull_requests(repo, limit)
     keys = [v["version"] for v in chosen]
+    entries = read(repo / LEDGER)
     nums = {v["version"]: numbers_of(v, prs, pr_source, commits, branches, ref) for v in chosen}
     rows = compare_rows(keys, nums, DEFINITIONS.__getitem__, list(DEFINITIONS), ABSENT, GROUPS)
     applied = any(v["factory_version"] for v in chosen)
@@ -357,7 +464,14 @@ def compare(repo: Path, ref: str = "HEAD", wanted: list[str] | None = None,
         "agent_rule": agent_rule(branches),
         "versions": chosen,
         "rows": rows,
-        "readings": readings_about(read(repo / LEDGER), keys),
+        "answers": {
+            "about": ("Quick answers: what the person who asked for a task said when it ended, each beside "
+                      "its pull request's own numbers. Kept as given, one by one: they are not part of the "
+                      "numbers above, and are never counted, summed or scored."),
+            "questions": QUESTIONS, "choices": CHOICES, "task_numbers": TASK_NUMBERS,
+            "given": answers_beside(entries, prs, pr_source, all_versions, keys),
+        },
+        "readings": readings_about(entries, keys),
     }
 
 
@@ -368,6 +482,41 @@ def short(key: str) -> str:
         return key.replace("-", " ")
     sha, dash, rest = key.partition("-")
     return sha[:7] + (f"-{rest}" if dash else "")
+
+
+def answers_section(data: dict, command: str) -> str:
+    """The quick answers, each beside its pull request's numbers. No tally, no totals."""
+    e = html.escape
+    label = {v["version"]: f"V{i}" for i, v in enumerate(data["versions"], 1)}
+    given = data["answers"]["given"]
+    qs = data["answers"]["questions"]
+    parts = ['<section id="answers"><h2>Quick answers</h2>',
+             f"<p>{e(data['answers']['about'])} The questions: "
+             + " ".join(f"<i>{e(t)}</i> ({e(' / '.join(CHOICES[q]))})" for q, t in qs.items()) + "</p>"]
+    if not given:
+        parts.append("<p>No quick answers yet for these versions.</p>")
+    else:
+        heads = ["When", "Pull request", "Version", *qs.values(), "Its numbers", "Note"]
+        parts.append('<div class="scroll"><table><thead><tr>'
+                     + "".join(f"<th>{e(h)}</th>" for h in heads) + "</tr></thead><tbody>")
+        for a in given:
+            t = a["task"]
+            nums = ("not found" if t is None else
+                    f"{t['state']}; {t['review_rounds']} review rounds; "
+                    + (f"{fmt(t['hours_to_merge'])} hours to merge; " if t["hours_to_merge"] is not None else "")
+                    + (f"{t['corrections']} corrections" if t["corrections"] is not None else "no Lessons table"))
+            what = f"#{a['pr']}" if a["pr"] is not None else (a["branch"] or "")
+            parts.append(f"<tr><td>{e(str(a['date'])[:10])}</td><td>{e(what)}</td>"
+                         f"<td>{label.get(a['version'], e(a['version']))}</td>"
+                         + "".join(f"<td>{e(a[q] or '')}</td>" for q in qs)
+                         + f'<td>{e(nums)}<span class="sub">{e(a["source"])}</span></td>'
+                         f"<td>{e(a['note'] or '')}</td></tr>")
+        parts.append("</tbody></table></div><details><summary>What the pull request numbers count</summary><ul>")
+        parts += [f"<li><b>{e(k)}</b>: {e(d)}</li>" for k, d in data["answers"]["task_numbers"].items()]
+        parts.append("</ul></details>")
+    parts.append(f"<p>Add one with <code>{e(f'python3 {command} add-answer --pr N --stepped-in CHOICE --take-as-is CHOICE')}"
+                 "</code>.</p></section>")
+    return "\n".join(parts)
 
 
 def page(data: dict, command: str) -> str:
@@ -393,6 +542,7 @@ def page(data: dict, command: str) -> str:
                           f"request from a person's, are under each table. Agent rule: {e(data['agent_rule'])}."),
         "add_reading": f"python3 {command} add-reading --about VERSION --author WHO --text TEXT",
         "json_command": f"python3 {command} compare",
+        "before_readings": answers_section(data, command),
     }, data)
 
 
@@ -427,6 +577,14 @@ def main(argv: list[str]) -> int:
     r.add_argument("--about", nargs="+", required=True, metavar="VERSION")
     r.add_argument("--author", required=True, help="who wrote it: a role or an agent, not contact details")
     r.add_argument("--text", required=True)
+    a = sub.add_parser("add-answer", parents=[common],
+                       help="append the quick answer the person gave when a task ended")
+    a.add_argument("--pr", type=lambda s: int(s.lstrip("#")), metavar="N",
+                   help="the task's pull request (default: none; the branch ties it)")
+    a.add_argument("--branch", help="the task's branch (default: the current one)")
+    for q, flag in (("stepped_in", "--stepped-in"), ("take_as_is", "--take-as-is")):
+        a.add_argument(flag, dest=q, metavar="CHOICE", help=f"{QUESTIONS[q]} {' / '.join(CHOICES[q])}")
+    a.add_argument("--note", help="anything else they said about it, in their words")
     args = ap.parse_args(argv)
 
     try:
@@ -450,6 +608,14 @@ def main(argv: list[str]) -> int:
             about = [v["version"] for v in select(all_versions, args.about)]
             ref = (git(repo, "rev-parse", "--short=12", args.ref) or args.ref).strip()
             entry = reading(about, args.author, args.text, ref=ref)
+            append(repo / LEDGER, [entry])
+            print(json.dumps(entry, indent=1))
+        elif args.command == "add-answer":
+            commits_of(repo, args.ref)  # a repository with history: the answer needs a version
+            ref = (git(repo, "rev-parse", "--short=12", args.ref) or args.ref).strip()
+            branch = args.branch or (git(repo, "rev-parse", "--abbrev-ref", "HEAD") or "").strip()
+            entry = answer(args.pr, None if branch == "HEAD" else branch,
+                           {q: getattr(args, q) for q in QUESTIONS}, args.note, ref)
             append(repo / LEDGER, [entry])
             print(json.dumps(entry, indent=1))
     except ValueError as err:

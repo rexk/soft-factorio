@@ -15,8 +15,15 @@ The script is `metrics.py` in this skill's folder (`.agents/skills/metrics/`
 once installed). It needs only `python3` and git; pull request numbers also
 need the `gh` CLI, signed in. Nothing needs switching on first: every
 number is computed now from the repository's history, the history of
-`.agents/factory/manifest.json` and its pull requests. Only readings are
-stored, in `.agents/metrics/ledger.jsonl`.
+`.agents/factory/manifest.json` and its pull requests. Only readings and
+quick answers are stored, in `.agents/metrics/ledger.jsonl`.
+
+A quick answer is what the person who asked for a task said about it when
+it ended: how much they had to step in, and whether they would take the
+pull request as is. The `retro` skill asks at its end-of-task step and
+records the answer with `add-answer`. `compare` lists each answer beside
+its pull request's own numbers, apart from the numbers by version, which
+answers never change.
 
 ## Steps
 
@@ -68,3 +75,6 @@ stored, in `.agents/metrics/ledger.jsonl`.
   chat tools, the factory) unless the person asks for that, each time.
 - **Readings are added, never edited.** A new reading sits beside the
   earlier ones; don't rewrite or remove the ledger's lines.
+- **Answers stay as given.** Show quick answers one by one beside their
+  pull requests; don't count, total or score them, and don't record or
+  compare who gave them.

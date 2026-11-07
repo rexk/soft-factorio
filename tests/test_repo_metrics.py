@@ -1,7 +1,7 @@
-"""A repository's own numbers, from the metrics skill (docs/projects/2026-11-06-metrics, stage 2).
+"""A repository's own numbers, from the metrics skill (docs/projects/2026-11-06-metrics, stages 2 and 3).
 
-Each test names the design brief's test it proves (T2, and T3, T5-T12 for
-repository numbers) or the risk it covers (K1, K3). Every repository is a
+Each test names the design brief's test it proves (T2 and T4, and T3,
+T5-T12 for repository numbers) or the risk it covers (K1, K3). Every repository is a
 temporary git repository with dated commits; its pull requests come from
 the fake `gh` (evals/fakes/gh), so nothing touches a network. The script
 runs from where the factory installs it, .agents/skills/metrics/, inside
@@ -403,7 +403,8 @@ class StaysInTheRepository(Repo):
             if self.repo not in p.parents and p.parent != self.bin and p.suffix not in (".log", ".jsonl"))
         before = outside()
         for args in (("versions",), ("compare", "--html"),
-                     ("add-reading", "--about", V2, "--author", "an agent", "--text", "noted")):
+                     ("add-reading", "--about", V2, "--author", "an agent", "--text", "noted"),
+                     ("add-answer", "--pr", "7", "--stepped-in", "none", "--take-as-is", "yes")):
             code, _, err = self.run_tool(*args)
             self.assertEqual(code, 0, (args, err))
         self.assertEqual(outside(), before)
@@ -418,10 +419,101 @@ class StaysInTheRepository(Repo):
         self.assertEqual(changed, ["??", ".agents/metrics/"])  # the readings ledger, nothing else
 
 
+class QuickAnswers(Repo):
+    def answer(self, *args):
+        code, out, err = self.run_tool("add-answer", *args)
+        self.assertEqual(code, 0, err)
+        return json.loads(out)
+
+    def without_answers(self, data):
+        return {k: v for k, v in data.items() if k not in ("answers", "as_of")}
+
+    def test_t4_a_recorded_answer_sits_beside_its_task_and_nothing_else_changes(self):
+        before = self.compare()
+        self.assertEqual(before["answers"]["given"], [])
+        self.answer("--pr", "7", "--stepped-in", "some", "--take-as-is", "with edits")
+        after = self.compare()
+        self.assertEqual(self.without_answers(after), self.without_answers(before))
+        [given] = after["answers"]["given"]
+        self.assertEqual((given["pr"], given["version"], given["stepped_in"], given["take_as_is"]),
+                         (7, V2, "some", "with edits"))
+        self.assertEqual(given["task"], {"pr": 7, "opened": "2026-03-02T00:00:00Z", "state": "merged",
+                                         "review_rounds": 0, "hours_to_merge": 72.0, "corrections": 1})
+        self.assertIn("#7", given["source"])
+        self.assertIn("#7", self.cells(after, "agent_prs_opened")[V2]["source"])  # the same task's numbers
+
+    def test_t4_with_no_answer_every_number_is_the_same_even_without_pull_requests(self):
+        (self.bin / "gh").write_text(FAILING_GH.format(python=sys.executable))
+        before = self.compare()
+        self.answer("--pr", "7", "--take-as-is", "no")
+        after = self.compare()
+        self.assertEqual(self.without_answers(after), self.without_answers(before))
+        [given] = after["answers"]["given"]
+        self.assertIsNone(given["task"])
+        self.assertEqual(given["version"], V2)  # recorded now, in the current version
+        self.assertIn("gh auth login", given["source"])
+
+    def test_t4_the_task_s_branch_ties_an_answer_to_its_pull_request(self):
+        given = self.answer("--branch", "codex/dates", "--take-as-is", "No")
+        self.assertEqual((given["branch"], given["take_as_is"]), ("codex/dates", "no"))
+        self.assertNotIn("stepped_in", given)  # a question left unanswered isn't recorded
+        git(self.repo, "switch", "-q", "-c", "claude/deploy")
+        self.answer("--stepped-in", "a lot")  # the current branch
+        first, second = self.compare()["answers"]["given"]
+        self.assertEqual((first["pr"], first["version"], first["stepped_in"]), (4, V1, None))
+        self.assertEqual((second["pr"], second["version"], second["branch"]), (7, V2, "claude/deploy"))
+        self.assertEqual(first["task"]["review_rounds"], 2)
+
+    def test_t4_only_the_fixed_choices_are_taken(self):
+        for args in (("--pr", "7", "--stepped-in", "maybe"), ("--pr", "7", "--take-as-is", "sure"),
+                     ("--pr", "7"), ("--pr", "7", "--stepped-in", "none", "--note", "y" * 1001)):
+            code, _, err = self.run_tool("add-answer", *args)
+            self.assertEqual(code, 1, args)
+            self.assertIn("metrics:", err)
+        self.assertFalse((self.repo / rm.LEDGER).exists())
+
+    def test_t4_answers_show_with_the_versions_compared(self):
+        self.answer("--pr", "7", "--stepped-in", "none", "--take-as-is", "yes")
+        self.assertEqual(self.compare(V1)["answers"]["given"], [])
+        self.assertEqual(len(self.compare(V2)["answers"]["given"]), 1)
+
+    def test_x1_x5_answers_are_listed_one_by_one_never_counted(self):
+        for number, choice in (("7", "none"), ("8", "none"), ("4", "a lot")):
+            self.answer("--pr", number, "--stepped-in", choice)
+        answers = self.compare()["answers"]
+        self.assertEqual([(a["pr"], a["stepped_in"]) for a in answers["given"]],
+                         [(7, "none"), (8, "none"), (4, "a lot")])  # as given, in the order given
+        self.assertEqual(set(answers), {"about", "questions", "choices", "task_numbers", "given"})
+        for kind, value in keys_and_strings(answers):
+            if kind == "key":
+                self.assertNotIn(value.lower(), FORBIDDEN_KEYS | {"author", "count", "total", "mean"})
+        for entry in rm.read(self.repo / rm.LEDGER):
+            self.assertNotIn("author", entry)  # who answered is never kept, so never compared
+
+    def test_the_page_shows_each_answer_beside_its_task(self):
+        self.answer("--pr", "4", "--stepped-in", "some", "--note", "renamed <it> twice")
+        code, _, err = self.run_tool("compare", "--html")
+        self.assertEqual(code, 0, err)
+        page = (self.repo / rm.DEFAULT_PAGE).read_text()
+        for text in ("Quick answers", "#4", "some", "renamed &lt;it&gt; twice", "2 review rounds",
+                     "120 hours to merge", "2 corrections", rm.QUESTIONS["take_as_is"],
+                     f"python3 {INSTALLED}/metrics.py add-answer"):
+            self.assertIn(text, page)
+
+    def test_the_retro_skill_asks_what_add_answer_records(self):
+        retro = (ROOT / "skills" / "retro" / "SKILL.md").read_text()
+        for q, text in rm.QUESTIONS.items():
+            self.assertIn(f"{text} {' / '.join(rm.CHOICES[q])}", retro)
+        self.assertIn(f"python3 {INSTALLED}/metrics.py add-answer", retro)
+        cfg = json.loads((ROOT / "factory.json").read_text())
+        self.assertLess({"retro", "metrics"}, set(cfg["skills"]))  # installed together, always
+
+
 class NoVerdict(Repo):
     def setUp(self):
         super().setUp()
         self.run_tool("add-reading", "--about", V1, "--author", "maintainer", "--text", "fine")
+        self.run_tool("add-answer", "--pr", "7", "--stepped-in", "a lot", "--take-as-is", "no")
 
     def test_t10_no_field_is_a_score_or_a_verdict_and_no_lines_of_code(self):
         for command in (("compare",), ("versions",)):
@@ -438,7 +530,8 @@ class NoVerdict(Repo):
 
     def test_t11_no_headline_and_one_version_alone_shows_all_its_numbers(self):
         data = self.compare(V1)
-        self.assertEqual(set(data), {"about", "ledger", "as_of", "agent_rule", "versions", "rows", "readings"})
+        self.assertEqual(set(data), {"about", "ledger", "as_of", "agent_rule", "versions", "rows", "answers",
+                                     "readings"})
         self.assertEqual({r["metric"] for r in data["rows"]}, set(rm.DEFINITIONS))
         self.run_tool("compare", "--html")
         page = (self.repo / rm.DEFAULT_PAGE).read_text()
