@@ -34,6 +34,24 @@ over time, with people and agents saying what they mean.
   to `metrics-X4`). The verdict-free line moved from B7 to `metrics-X2`, and
   B8 to B10 became B7 to B9.
 
+## Revised after review (2026-11-06)
+
+The maintainer approved six fixes to the approved product brief:
+
+1. `metrics-X2` and `metrics-X4` cover only what the metrics add: scenario
+   pass marks still show, and the evals keep gating as before.
+2. `metrics-B9` and V5: nothing leaves a repository unless its authors
+   choose to share, with the same consent as upstream lessons.
+3. `metrics-B2` and `metrics-B5` count the time before the factory as its
+   own period, the baseline for an adopting repository.
+4. `metrics-X3`: no number is the headline, and the rest are one step away
+   (a view may focus on a few).
+5. Each X line names the value point or behaviour it guards.
+6. Status and takeaway brought up to date.
+
+The design brief got matching edits: T2, T10–T12, a new `metrics-N6`
+(sharing not built yet), and the stage 2 text.
+
 ## Agent's calls, for the maintainer to check
 
 - A factory change can be measured before it lands (`metrics-B1`, `metrics-B5`):

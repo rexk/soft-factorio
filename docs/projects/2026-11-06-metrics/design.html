@@ -120,7 +120,7 @@ footer{font:12px/1.4 var(--mono);color:var(--muted);border-top:1px solid var(--l
       <div class="card pick" id="a2">
         <h3>A2. One ledger per repository, in stages (recommended)</h3>
         <span class="chip warn">Effort M overall</span> <span class="chip warn">Risk medium in stage 2</span>
-        <p>A1 is stage 1. Stage 2 ships the same tool and a small <code>metrics</code> skill into adopting repositories. It computes their numbers on demand from git, the manifest's history, and their PRs (merged or not, review rounds, time to merge, reverts, Lessons rows), split by factory version. Stage 3 adds the optional quick answer at the end of a task.</p>
+        <p>A1 is stage 1. Stage 2 ships the same tool and a small <code>metrics</code> skill into adopting repositories. It computes their numbers on demand from git, the manifest's history, and their PRs (merged or not, review rounds, time to merge, reverts, Lessons rows), split by factory version, with the time before the factory as its own period. Stage 3 adds the optional quick answer at the end of a task.</p>
         <ul><li>Reuses: everything in A1, the manifest, the retro tables, the fake <code>gh</code>.</li>
         <li>Delivers all of B1–B9. Each stage is useful by itself.</li></ul>
       </div>
@@ -129,7 +129,7 @@ footer{font:12px/1.4 var(--mono);color:var(--muted);border-top:1px solid var(--l
         <span class="chip ok">Effort S</span> <span class="chip bad">Risk high</span>
         <p>Attach numbers and readings to factory commits as git notes, or post them as issues.</p>
         <ul><li>For: notes attach to a version natively.</li>
-        <li>Against: git doesn't push or fetch notes by default, and GitHub doesn't show them, so agents and authors miss them (B5, B9). Issues live outside the repository's files, which strains B10 and needs a network.</li></ul>
+        <li>Against: git doesn't push or fetch notes by default, and GitHub doesn't show them, so agents and authors miss them (B5, B9). Issues live outside the repository's files, which strains B9 and needs a network.</li></ul>
       </div>
     </div>
   </section>
@@ -185,6 +185,7 @@ footer{font:12px/1.4 var(--mono);color:var(--muted);border-top:1px solid var(--l
       <tbody>
         <tr id="n1"><td><b>N1</b></td><td>Appetite: stage 1 about a day; stage 2 a few days; stage 3 half a day. Fixed time, flexible scope: cut numbers, not stages.</td></tr>
         <tr id="n2"><td><b>N2</b></td><td>Python 3 standard library only. Reading PRs goes through the <code>gh</code> CLI the repository already uses; nothing is written anywhere but the repository itself (B9 throughout).</td></tr>
+        <tr id="n6"><td><b>N6</b></td><td>Not now: a way to share numbers or readings. B9 only requires that nothing leaves a repository without its authors' choice; sharing can come later through the existing upstream consent.</td></tr>
         <tr id="n3"><td><b>N3</b></td><td>Anti-goals are the product brief's X1–X5: no score, no verdict, no number shown alone, no gate in CI or anywhere else, no ranking of people or repositories.</td></tr>
         <tr id="n4"><td><b>N4</b></td><td>Not now: interventions and permission prompts from harness session logs. They are specific to each harness and live outside the repository. A later stage can add them as more numbers (B6).</td></tr>
         <tr id="n5"><td><b>N5</b></td><td>The ledger passes the privacy scan: numbers, versions and short notes only, no transcripts or judge text copied in.</td></tr>
@@ -218,7 +219,7 @@ footer{font:12px/1.4 var(--mono);color:var(--muted);border-top:1px solid var(--l
         <tr id="k2"><td><b>K2</b></td><td>Three runs per scenario make most changes look like noise</td><td>None: show the counts (B3) and leave judging to the reader. No significance tests</td></tr>
         <tr id="k3"><td><b>K3</b></td><td>Parsing Lessons tables out of PR descriptions is fragile</td><td>2 hours. Count rows when a table is found; otherwise show as missing (B6)</td></tr>
         <tr id="k4"><td><b>K4</b></td><td>Parallel eval passes appending at once</td><td>An hour. Append atomically, as PR #4 did for the snapshot cache</td></tr>
-        <tr id="k5"><td><b>K5</b></td><td>The page drifting into a dashboard with headline numbers</td><td>None: X1–X3 have tests (T10–T12)</td></tr>
+        <tr id="k5"><td><b>K5</b></td><td>The page drifting into a dashboard with headline numbers</td><td>None: X1–X4 have tests (T10–T12)</td></tr>
       </tbody>
     </table></div>
   </section>
@@ -230,7 +231,7 @@ footer{font:12px/1.4 var(--mono);color:var(--muted);border-top:1px solid var(--l
       <thead><tr><th>ID</th><th>Proves</th><th>Test</th></tr></thead>
       <tbody>
         <tr id="t1"><td><b>T1</b></td><td>B1</td><td>Two eval passes with a stub scenario: both are in the ledger with their versions; a dirty checkout records <code>-modified</code></td></tr>
-        <tr id="t2"><td><b>T2</b></td><td>B2</td><td>A temporary repository with two manifest versions and fake PRs: numbers come out split by factory version, with nothing configured first</td></tr>
+        <tr id="t2"><td><b>T2</b></td><td>B2</td><td>A temporary repository with commits before the factory, then two manifest versions, and fake PRs: numbers come out for "before the factory" and for each version, with nothing configured first</td></tr>
         <tr id="t3"><td><b>T3</b></td><td>B3</td><td>Every number in the output carries a definition, a source and a count</td></tr>
         <tr id="t4"><td><b>T4</b></td><td>B4</td><td>A recorded quick answer sits beside its task; with no answer, every other number is identical</td></tr>
         <tr id="t5"><td><b>T5</b></td><td>B5</td><td>Comparing two versions shows both values and the change</td></tr>
@@ -238,9 +239,9 @@ footer{font:12px/1.4 var(--mono);color:var(--muted);border-top:1px solid var(--l
         <tr id="t7"><td><b>T7</b></td><td>B7</td><td>Two readings on the same comparison are both kept, each with author and date</td></tr>
         <tr id="t8"><td><b>T8</b></td><td>B8</td><td>The compare output parses as JSON with no page rendered</td></tr>
         <tr id="t9"><td><b>T9</b></td><td>B9</td><td>A run writes only inside the repository and never pushes or posts (fake <code>gh</code> and <code>git</code> logs show reads only)</td></tr>
-        <tr id="t10"><td><b>T10</b></td><td>X1, X2</td><td>No output field is a score, verdict or label like good/bad; lines of code never appear as a headline number</td></tr>
-        <tr id="t11"><td><b>T11</b></td><td>X3, X5</td><td>Every comparison includes all of each version's numbers; no output groups by author or across repositories</td></tr>
-        <tr id="t12"><td><b>T12</b></td><td>X4</td><td>The tool's exit code is the same whatever the numbers are</td></tr>
+        <tr id="t10"><td><b>T10</b></td><td>X1, X2</td><td>No output field is a score, verdict or label like good/bad; lines of code never appear as a headline number; a scenario's pass mark appears only as the value recorded with the scenario</td></tr>
+        <tr id="t11"><td><b>T11</b></td><td>X3, X5</td><td>No number is marked as the headline; every view includes or links to the rest of that version's numbers; no output groups by author or across repositories</td></tr>
+        <tr id="t12"><td><b>T12</b></td><td>X4</td><td>The tool's exit code is the same whatever the numbers are; the eval runner's own pass-mark gating is unchanged</td></tr>
       </tbody>
     </table></div>
   </section>

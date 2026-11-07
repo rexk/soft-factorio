@@ -55,10 +55,10 @@ footer{font:12px/1.4 var(--mono);color:var(--muted);border-top:1px solid var(--l
 <main>
   <header>
     <h1>Anyone can see whether the factory works better than before, and say what the numbers mean</h1>
-    <div class="meta"><span>Key: metrics</span><span>Date: <time datetime="2026-11-06">2026-11-06</time></span><span>Author: an agent, with the maintainer</span><span>Status: product brief, awaiting approval</span><span>Source: the maintainer's words and answers in chat; <a href="research.md">research.md</a></span></div>
+    <div class="meta"><span>Key: metrics</span><span>Date: <time datetime="2026-11-06">2026-11-06</time></span><span>Author: an agent, with the maintainer</span><span>Status: product brief, approved 2026-11-06, revised after review</span><span>Source: the maintainer's words and answers in chat; <a href="research.md">research.md</a></span></div>
   </header>
 
-  <p class="takeaway">The factory keeps a few rough numbers for each version and shows them next to earlier versions. People and agents read them and record what they think they mean. That gives us evidence, not only a feeling, that a change made things better or worse. No single number is the measure, lines of code least of all: the numbers are read together and never become a score or a target.</p>
+  <p class="takeaway">The factory, and every repository that uses it, keeps a few rough numbers for each factory version and shows them next to earlier versions. The maintainer, agents and each repository's authors read them and record what they think they mean. That gives us evidence, not only a feeling, that a change made things better or worse. No single number is the measure, lines of code least of all: the numbers are read together and never become a score or a target.</p>
 
   <section id="value">
     <h2>Value</h2>
@@ -68,7 +68,7 @@ footer{font:12px/1.4 var(--mono);color:var(--muted);border-top:1px solid var(--l
       <li id="v2"><b>V2.</b> Rough numbers are fine. A number that is easy to get, even an ambiguous one, earns its place by being comparable over time, not by being precise.</li>
       <li id="v3"><b>V3.</b> The meaning stays with the reader. The numbers carry no verdict, and each person or agent writes their own reading of them.</li>
       <li id="v4"><b>V4.</b> How it felt sits next to what was measured, so we can see when the two disagree.</li>
-      <li id="v5"><b>V5.</b> Safe to adopt: a repository's numbers are kept in that repository and sent nowhere else.</li>
+      <li id="v5"><b>V5.</b> Safe to adopt: a repository's numbers stay in that repository unless its authors choose to share them.</li>
     </ul>
   </section>
 
@@ -103,7 +103,7 @@ footer{font:12px/1.4 var(--mono);color:var(--muted);border-top:1px solid var(--l
       <thead><tr><th>ID</th><th>Behaviour</th></tr></thead>
       <tbody>
         <tr id="b1"><td><b>B1</b></td><td>After an eval pass, its numbers (such as how often each scenario passed, what it cost, how long it took) are kept with the factory version they measured, and the numbers from earlier passes are still there.<span class="note">Covers every scenario and every arm that ran. A pass on a change that hasn't landed yet is kept too, so a change can be checked before it lands.</span></td></tr>
-        <tr id="b2"><td><b>B2</b></td><td>In a repository that uses the factory, anyone can get that repository's numbers (such as how its agents' pull requests fared, and how often people had to correct the agent) for each factory version it has had. The numbers come from what the repository already holds, such as its history and pull requests, so nothing needs switching on beforehand.</td></tr>
+        <tr id="b2"><td><b>B2</b></td><td>In a repository that uses the factory, anyone can get that repository's numbers (such as how its agents' pull requests fared, and how often people had to correct the agent) for each factory version it has had, and for the time before it adopted the factory. The numbers come from what the repository already holds, such as its history and pull requests, so nothing needs switching on beforehand.</td></tr>
         <tr id="b3"><td><b>B3</b></td><td>Every number shows what it counts, where it came from, and how many runs or tasks it rests on, so a reader can judge how much to trust it.</td></tr>
         <tr id="b4"><td><b>B4</b></td><td>When an agent's task ends, the person who asked for it can give a quick answer on how it went. The answer is kept next to that task's numbers. Skipping it changes nothing else.</td></tr>
       </tbody>
@@ -113,7 +113,7 @@ footer{font:12px/1.4 var(--mono);color:var(--muted);border-top:1px solid var(--l
     <div class="scroll"><table>
       <thead><tr><th>ID</th><th>Behaviour</th></tr></thead>
       <tbody>
-        <tr id="b5"><td><b>B5</b></td><td>Anyone can see one version's numbers next to earlier versions' numbers, with the change between them shown.<span class="note">For the factory, a version is a state of the factory, released or not. For a repository, it is a factory version the repository has applied.</span></td></tr>
+        <tr id="b5"><td><b>B5</b></td><td>Anyone can see one version's numbers next to earlier versions' numbers, with the change between them shown.<span class="note">For the factory, a version is a state of the factory, released or not. For a repository, it is a factory version the repository has applied, or "before the factory" for the time before its first one.</span></td></tr>
         <tr id="b6"><td><b>B6</b></td><td>A number that a version doesn't have shows as missing, never as zero. That includes a kind of number added later: older versions show it as missing, and their other numbers still compare.</td></tr>
       </tbody>
     </table></div>
@@ -131,7 +131,7 @@ footer{font:12px/1.4 var(--mono);color:var(--muted);border-top:1px solid var(--l
     <div class="scroll"><table>
       <thead><tr><th>ID</th><th>Behaviour</th></tr></thead>
       <tbody>
-        <tr id="b9"><td><b>B9</b></td><td>Numbers, quick answers and readings about a repository stay in that repository. Nothing is sent to the factory or anywhere else.</td></tr>
+        <tr id="b9"><td><b>B9</b></td><td>Numbers, quick answers and readings about a repository stay in that repository. Nothing is sent to the factory or anywhere else unless the repository's authors choose to share it, each time.<span class="note">The same consent as sending lessons back to the factory: a repository that hasn't opted in is never asked to share.</span></td></tr>
       </tbody>
     </table></div>
   </section>
@@ -142,11 +142,11 @@ footer{font:12px/1.4 var(--mono);color:var(--muted);border-top:1px solid var(--l
     <div class="scroll"><table>
       <thead><tr><th>ID</th><th>Must not</th></tr></thead>
       <tbody>
-        <tr id="x1"><td><b>X1</b></td><td>Present any single number as the measure of how well the factory, its skills or its agents are doing. Above all, lines of code written by agents are never shown as a measure of success.<span class="note">The maintainer's example. The same holds for most numbers: they mean something only in combination, and the reasoning belongs to the reader.</span></td></tr>
-        <tr id="x2"><td><b>X2</b></td><td>Attach a verdict to the numbers: no "good" or "bad", no overall score, no pass mark of their own.</td></tr>
-        <tr id="x3"><td><b>X3</b></td><td>Show a number on its own. A comparison always shows all of a version's numbers together, so readers can reason across them.</td></tr>
-        <tr id="x4"><td><b>X4</b></td><td>Turn a number into a target or a gate: nothing fails, blocks or gets rewarded because a number moved.</td></tr>
-        <tr id="x5"><td><b>X5</b></td><td>Rank or compare people, agents or repositories against each other by their numbers.<span class="note">Agent's call, extending the interview answer to compare only against earlier versions.</span></td></tr>
+        <tr id="x1"><td><b>X1</b></td><td>Present any single number as the measure of how well the factory, its skills or its agents are doing. Above all, lines of code written by agents are never shown as a measure of success.<span class="note">Guards V3. The maintainer's example. The same holds for most numbers: they mean something only in combination, and the reasoning belongs to the reader.</span></td></tr>
+        <tr id="x2"><td><b>X2</b></td><td>Attach a verdict to the numbers: no "good" or "bad", no overall score, no pass mark of their own.<span class="note">Guards V3. A scenario's own pass mark, set by the evals, still shows as a recorded fact; the metrics add none.</span></td></tr>
+        <tr id="x3"><td><b>X3</b></td><td>Present one number alone as the headline. Wherever a number is shown, the rest of that version's numbers are one step away, so readers can reason across them.<span class="note">Guards V2 and V3. A view may focus on a few numbers.</span></td></tr>
+        <tr id="x4"><td><b>X4</b></td><td>Turn a number into a new target or gate: nothing fails, blocks or gets rewarded because a metric moved.<span class="note">Guards V2. The evals keep gating as they do today: a scenario below its pass mark still holds a release back.</span></td></tr>
+        <tr id="x5"><td><b>X5</b></td><td>Rank or compare people, agents or repositories against each other by their numbers.<span class="note">Guards B5. Agent's call, extending the interview answer to compare only against earlier versions.</span></td></tr>
       </tbody>
     </table></div>
     <p>Which numbers to start with, the order to build in (the factory's own evals first), and every question of how all belong in the design brief.</p>
