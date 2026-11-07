@@ -58,7 +58,7 @@ footer{font:12px/1.4 var(--mono);color:var(--muted);border-top:1px solid var(--l
     <div class="meta"><span>Key: metrics</span><span>Date: <time datetime="2026-11-06">2026-11-06</time></span><span>Author: an agent, with the maintainer</span><span>Status: product brief, awaiting approval</span><span>Source: the maintainer's words and answers in chat; <a href="research.md">research.md</a></span></div>
   </header>
 
-  <p class="takeaway">The factory keeps a few rough numbers for each version and shows them next to earlier versions. People and agents read them and record what they think they mean. That gives us evidence, not only a feeling, that a change made things better or worse.</p>
+  <p class="takeaway">The factory keeps a few rough numbers for each version and shows them next to earlier versions. People and agents read them and record what they think they mean. That gives us evidence, not only a feeling, that a change made things better or worse. No single number is the measure, lines of code least of all: the numbers are read together and never become a score or a target.</p>
 
   <section id="value">
     <h2>Value</h2>
@@ -85,16 +85,16 @@ footer{font:12px/1.4 var(--mono);color:var(--muted);border-top:1px solid var(--l
           <text x="200" y="58" text-anchor="middle" fill="var(--muted)" font-size="13">B5–B6</text>
           <rect x="286" y="16" width="112" height="52" rx="6" fill="var(--accent-soft)" stroke="var(--accent)"/>
           <text x="342" y="40" text-anchor="middle" fill="var(--fg)" font-weight="600">Interpret</text>
-          <text x="342" y="58" text-anchor="middle" fill="var(--muted)" font-size="13">B7–B9</text>
+          <text x="342" y="58" text-anchor="middle" fill="var(--muted)" font-size="13">B7–B8</text>
         </g>
         <g stroke="var(--muted)" stroke-width="1.5" fill="var(--muted)">
           <line x1="116" y1="42" x2="136" y2="42"/><path d="M136 37 L143 42 L136 47 Z" stroke="none"/>
           <line x1="258" y1="42" x2="278" y2="42"/><path d="M278 37 L285 42 L278 47 Z" stroke="none"/>
         </g>
-        <text x="200" y="90" text-anchor="middle" fill="var(--muted)" font-size="13" font-family="var(--sans)">B10 throughout: nothing leaves the repository</text>
+        <text x="200" y="90" text-anchor="middle" fill="var(--muted)" font-size="13" font-family="var(--sans)">Throughout: B9, and must-nots X1–X5</text>
       </svg>
       <figcaption id="f1cap"><b>Numbers are recorded for each version, compared with earlier versions, then interpreted by people and agents.</b>
-        <details><summary>Groups</summary>Record: B1–B4 · Compare: B5–B6 · Interpret: B7–B9 · Throughout: B10</details>
+        <details><summary>Groups</summary>Record: B1–B4 · Compare: B5–B6 · Interpret: B7–B8 · Throughout: B9 and Must not X1–X5</details>
       </figcaption>
     </figure>
 
@@ -122,9 +122,8 @@ footer{font:12px/1.4 var(--mono);color:var(--muted);border-top:1px solid var(--l
     <div class="scroll"><table>
       <thead><tr><th>ID</th><th>Behaviour</th></tr></thead>
       <tbody>
-        <tr id="b7"><td><b>B7</b></td><td>The numbers come with no verdict: no "good" or "bad", no overall score, no pass mark of their own.</td></tr>
-        <tr id="b8"><td><b>B8</b></td><td>A person or an agent can write down their reading of a comparison. It is kept with the numbers it refers to, along with who wrote it and when. Several readings can sit side by side, and a new reading never replaces an earlier one.<span class="note">The maintainer, agents, and the authors of each adopting repository can all add readings.</span></td></tr>
-        <tr id="b9"><td><b>B9</b></td><td>An agent can read the numbers and the earlier readings as plain, machine-readable data.</td></tr>
+        <tr id="b7"><td><b>B7</b></td><td>A person or an agent can write down their reading of a comparison. It is kept with the numbers it refers to, along with who wrote it and when. Several readings can sit side by side, and a new reading never replaces an earlier one.<span class="note">The maintainer, agents, and the authors of each adopting repository can all add readings.</span></td></tr>
+        <tr id="b8"><td><b>B8</b></td><td>An agent can read the numbers and the earlier readings as plain, machine-readable data.</td></tr>
       </tbody>
     </table></div>
 
@@ -132,7 +131,22 @@ footer{font:12px/1.4 var(--mono);color:var(--muted);border-top:1px solid var(--l
     <div class="scroll"><table>
       <thead><tr><th>ID</th><th>Behaviour</th></tr></thead>
       <tbody>
-        <tr id="b10"><td><b>B10</b></td><td>Numbers, quick answers and readings about a repository stay in that repository. Nothing is sent to the factory or anywhere else.</td></tr>
+        <tr id="b9"><td><b>B9</b></td><td>Numbers, quick answers and readings about a repository stay in that repository. Nothing is sent to the factory or anywhere else.</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section id="must-not">
+    <h2>Must not</h2>
+    <p>The numbers are rough, and none of them means much alone. What the product must never do:</p>
+    <div class="scroll"><table>
+      <thead><tr><th>ID</th><th>Must not</th></tr></thead>
+      <tbody>
+        <tr id="x1"><td><b>X1</b></td><td>Present any single number as the measure of how well the factory, its skills or its agents are doing. Above all, lines of code written by agents are never shown as a measure of success.<span class="note">The maintainer's example. The same holds for most numbers: they mean something only in combination, and the reasoning belongs to the reader.</span></td></tr>
+        <tr id="x2"><td><b>X2</b></td><td>Attach a verdict to the numbers: no "good" or "bad", no overall score, no pass mark of their own.</td></tr>
+        <tr id="x3"><td><b>X3</b></td><td>Show a number on its own. A comparison always shows all of a version's numbers together, so readers can reason across them.</td></tr>
+        <tr id="x4"><td><b>X4</b></td><td>Turn a number into a target or a gate: nothing fails, blocks or gets rewarded because a number moved.</td></tr>
+        <tr id="x5"><td><b>X5</b></td><td>Rank or compare people, agents or repositories against each other by their numbers.<span class="note">Agent's call, extending the interview answer to compare only against earlier versions.</span></td></tr>
       </tbody>
     </table></div>
     <p>Which numbers to start with, the order to build in (the factory's own evals first), and every question of how all belong in the design brief.</p>

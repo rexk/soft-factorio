@@ -27,13 +27,21 @@ over time, with people and agents saying what they mean.
 - **Who interprets:** the maintainer, agents, and authors of each adopting
   repository.
 - **Perception:** an optional quick answer kept beside the numbers.
+- **Must not (added after the first draft):** the numbers are not dogmatic.
+  No single number, and especially not lines of code written by agents, is
+  the measure of how well the agents or skills are doing. Numbers are read
+  in combination, with the reasoning left to the reader (`metrics-X1`
+  to `metrics-X4`). The verdict-free line moved from B7 to `metrics-X2`, and
+  B8 to B10 became B7 to B9.
 
 ## Agent's calls, for the maintainer to check
 
 - A factory change can be measured before it lands (`metrics-B1`, `metrics-B5`):
   otherwise a change to a skill could only be checked after it shipped.
-- Readings are added, never replaced (`metrics-B8`): disagreement between
+- Readings are added, never replaced (`metrics-B7`): disagreement between
   readings is worth keeping.
+- Numbers never rank people, agents or repositories against each other
+  (`metrics-X5`): extends "compare only against earlier versions".
 
 ## Carried to the design brief
 
