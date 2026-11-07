@@ -20,6 +20,12 @@ This file is the short, human summary.
   git, the manifest's history and `gh pr list`. Readings go in
   `.agents/metrics/ledger.jsonl`. The ledger code it shares with
   `tools/metrics.py` now lives in the skill's folder.
+- `retro` ends a task with one optional line: "How much did you have to
+  step in? none / some / a lot. Would you take this pull request as is?
+  yes / with edits / no." It never waits for a reply. An answer, if one
+  comes, is recorded with `metrics.py add-answer` in the same ledger, and
+  `compare` lists it beside that task's pull request and its numbers.
+  Answers are never counted into the numbers or a score.
 
 ## 2026-11-04
 
