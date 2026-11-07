@@ -20,6 +20,9 @@ is public and lands in other people's repositories.
   edit them to make a failing run pass; propose the change and let the
   maintainer decide. The same goes for the behaviour lines they test.
 - If a behaviour can't be met, say so. Don't weaken a test to get green.
+- Favour issues with evidence. When one has none, don't assume the cause:
+  tell the author what's missing and what would confirm it, then try to
+  reproduce it with a scenario run.
 - Eval runs cost API usage: run the smoke set (T1, T3, T10) when `START.md`
   changes, everything before a release. Test repositories are snapshots in a
   scratch folder and are never pushed to.
