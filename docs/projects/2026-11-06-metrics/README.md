@@ -14,7 +14,7 @@ over time, with people and agents saying what they mean.
 | Design brief | A2 picked 2026-11-06: [design.html](design.html). One ledger per repository, in three stages |
 | Stage 1: factory eval ledger, compare, readings | Built, in review: `evals/ledger.jsonl`, `tools/metrics.py`, `tests/test_metrics.py` |
 | Stage 2: numbers in adopting repositories | Built, in review: the `metrics` skill (`skills/metrics/`), installed by the factory; `tests/test_repo_metrics.py` |
-| Stage 3: optional quick answer at the retro's end-of-task step | Not started |
+| Stage 3: optional quick answer at the retro's end-of-task step | Built, in review: retro step 6 asks, `metrics.py add-answer` records in `.agents/metrics/ledger.jsonl`, `compare` shows each answer beside its pull request; T4 in `tests/test_repo_metrics.py`. T9 and T7 to rerun before release |
 
 ## Decided in the interview (2026-11-06)
 
