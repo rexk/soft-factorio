@@ -11,6 +11,10 @@ request.
 
 ## 2026-11-06
 
+- `outcome-brief`: every product brief now states what the product must
+  never do, as observable `X1…` lines next to value and behaviour. Anti-goals
+  are asked for the product brief, and the design brief's test plan covers
+  each `X` line. Build limits stay in the design brief's `N` bounds.
 - Eval ledger (`evals/ledger.jsonl`): every eval pass and `--calibrate`
   appends its numbers with the factory version they measured, including
   turns and skills used per run. Starts with the v1 build's passes of

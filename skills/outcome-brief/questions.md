@@ -13,8 +13,21 @@ your recommended answer.
 | **For whom** | "Who gets that value? A named person, role or system, not 'users'." | A category can't be designed for |
 | **Why now** | "What makes this worth doing now rather than later?" | Sets the appetite |
 | **Smallest version** | "What's the smallest version that would already be worth having?" | Keeps the first build small |
-| **Anti-goals** | "What would make this a failure even if it technically works?" | Catches the wrong solution early |
 | **Future fit** | "As agents and tools improve, does this get more useful or less?" | Avoids building what's about to be free |
+
+## Must not (always, product brief)
+
+Ask right after value, while the value is fresh: each answer becomes an `X`
+line.
+
+| Area | Ask in this spirit | Why it matters |
+|---|---|---|
+| **Anti-goals** | "What would make this a failure even if it technically works?" | Catches the wrong solution early |
+| **Misreading** | "What must nobody conclude from it?" For a number: "Which reading would be wrong, or easy to game?" | A measure taken alone becomes the target |
+| **Harm** | "What must it never do to the people or systems it serves?" | Sets the lines a test must prove are never crossed |
+
+Keep build limits ("no new dependencies", "not in this version") for the
+design brief's bounds.
 
 ## Behaviour and proof (product brief)
 
@@ -35,7 +48,8 @@ your recommended answer.
 
 ## How to ask
 
-- Ask them to **describe value and behaviour first**, because options steer.
+- Ask them to **describe value and behaviour first**, because options steer,
+  then what it must never do.
 - For every **decision** (especially about how), give 2–3 real options with
   the evidence for each, then your recommendation.
 - When they name an approach, thank them and carry it to the design brief,

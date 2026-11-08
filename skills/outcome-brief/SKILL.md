@@ -1,6 +1,6 @@
 ---
 name: outcome-brief
-description: Turn what a person wants into a clear brief before any real work starts, by interviewing them, writing a product brief (the value we bring and the behaviour that delivers it), then drafting a design brief that weighs alternatives with evidence. Use when someone asks for something to be built, changed or decided and the intent isn't fully clear yet, or when they ask for a brief, spec, plan or "let's think this through". The brief states the goal, not the steps, so the building agent is free to choose the path.
+description: Turn what a person wants into a clear brief before any real work starts, by interviewing them, writing a product brief (the value we bring, the behaviour that delivers it and what it must never do), then drafting a design brief that weighs alternatives with evidence. Use when someone asks for something to be built, changed or decided and the intent isn't fully clear yet, or when they ask for a brief, spec, plan or "let's think this through". The brief states the goal, not the steps, so the building agent is free to choose the path.
 ---
 
 # Outcome brief
@@ -14,7 +14,7 @@ You produce up to two HTML pages, written with the **html-for-humans** skill:
 
 | Brief | Answers | Written by |
 |---|---|---|
-| **Product brief** | The value we bring, and the behaviour that delivers it. Nothing about how | you, from the interview; approved by the person |
+| **Product brief** | The value we bring, the behaviour that delivers it, and what it must never do. Nothing about how | you, from the interview; approved by the person |
 | **Design brief** | How to get there: alternatives with evidence, the pick, bounds, risks, test plan | you, after the product brief is approved; the person picks the option |
 
 Keep the two apart. A product brief that names tools, install methods or file
@@ -25,8 +25,8 @@ layouts has started designing too early.
 1. **Triage.** Check what you already know against the product brief's
    sections ([brief-sections.md](brief-sections.md)).
    - **Everything that matters is already stated**, and the work is small: say
-     back the value and the behaviour in two lines, then do the work. No
-     files.
+     back the value, the behaviour and anything it must not do in two or three
+     lines, then do the work. No files.
    - **Something that would change what gets built is missing:** carry on with
      step 2.
 
@@ -43,7 +43,8 @@ layouts has started designing too early.
    "yes" accepts it. A question with one option is a statement in disguise.
    Use the questions in [questions.md](questions.md) as territory to cover,
    never as a script. Ask them to describe the value and behaviour in their own
-   words before offering options.
+   words before offering options, then what it must never do, even if it
+   works.
    - For more than three questions, or on a phone, send the round as an
      html-for-humans page with an answer block.
    - Each answer reshapes the list: drop what it settled, and add what it
@@ -62,15 +63,15 @@ layouts has started designing too early.
      think"): take your recommendations, then go straight to step 5, and let
      the brief itself be the playback. They have handed you the decisions,
      not the approval. Sort each call before writing it down:
-     - **It shapes value or behaviour** (who it's for, which settings,
-       what's left out): write it as that `V` or `B` line, marked "my call",
+     - **It shapes value, behaviour or a must-not** (who it's for, which
+       settings, what's left out): write it as that `V`, `B` or `X` line, marked "my call",
        with a reason in the same terms.
      - **It's about how** (where it gets built, how things are kept, what
        runs behind it): keep it out of the product brief. Note it in the
        state file's open list for the design brief, and mention it in your
        reply so they can redirect early.
 5. **Write the product brief** as an html-for-humans page, using the sections
-   and stable IDs in [brief-sections.md](brief-sections.md). It has two parts
+   and stable IDs in [brief-sections.md](brief-sections.md). It has three parts
    only:
    - **Value:** one value proposition (what value we bring, to whom, and how),
      plus a few value points. It must still read true under a completely
@@ -78,14 +79,18 @@ layouts has started designing too early.
    - **Behaviour:** what people and systems can do or see once it exists. Each
      line is observable, so a unit or integration test can prove it, runnable
      locally and in CI. Group the lines when there are many.
+   - **Must not:** what the product must never do, even when it works: the
+     misuse, misreading or harm that would defeat the value. Each line is
+     observable too, so a test can prove it never happens. If the person named
+     none, propose the likeliest one, marked "my call".
 
-   Bounds, latitude, approaches the person named, your calls about how and
-   open questions belong to the design brief. So does what you found in the
-   repo (which files exist, what it holds): the product brief doesn't cite
-   files. Add no "decided for you" section; calls show on the lines they
-   shape.
+   Bounds, latitude, not-now scope and build constraints, approaches the
+   person named, your calls about how and open questions belong to the
+   design brief. So does what you found in the repo (which files exist, what
+   it holds): the product brief doesn't cite files. Add no "decided for you"
+   section; calls show on the lines they shape.
    [example-outcome-brief.html](example-outcome-brief.html) shows a filled
-   product brief. *Done when* both parts are filled.
+   product brief. *Done when* all three parts are filled.
 6. **Reader test.** Give **only the brief** to a fresh agent (a subagent, or a
    new session) and ask it what it would need to know to build this. Sort its
    questions:
@@ -121,14 +126,15 @@ layouts has started designing too early.
    - **Risks and rabbit holes**: the parts that could eat time, and how to
      timebox them.
    - **Test plan**: which unit and integration tests prove each behaviour
-     line, and the one command that runs them locally and in CI. If the repo
+     and must-not line, and the one command that runs them locally and in CI. If the repo
      lacks that command, adding it is part of the plan.
 
    Leave out file-by-file instructions; the builder decides those. *Done when*
    they pick an approach.
 9. **Hand off.** The builder starts from the two briefs in a fresh context,
    because the interview's detours are noise for building. The work is done
-   when every behaviour line has a passing test, locally and in CI.
+   when every behaviour and must-not line has a passing test, locally and in
+   CI.
    - **The bounds are the only stops.** The builder checks with the person
      only at what the bounds list as "checks first", for a choice that would
      change the product brief, or for something only the person can give.
