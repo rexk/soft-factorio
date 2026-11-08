@@ -15,6 +15,27 @@ request.
   never do, as observable `X1…` lines next to value and behaviour. Anti-goals
   are asked for the product brief, and the design brief's test plan covers
   each `X` line. Build limits stay in the design brief's `N` bounds.
+- Eval ledger (`evals/ledger.jsonl`): every eval pass and `--calibrate`
+  appends its numbers with the factory version they measured, including
+  turns and skills used per run. Starts with the v1 build's passes of
+  2026-11-05, their notes kept as readings.
+- `tools/metrics.py`: `compare` puts versions side by side as JSON, or as a
+  page with `--html`; `add-reading` records what someone thinks the numbers
+  mean. No scores, verdicts or gates.
+- `metrics` skill, installed with the factory: a repository's own numbers
+  (agent pull requests merged, closed or open, review rounds, time to
+  merge, reverts, corrections from retro Lessons tables) before the
+  factory and for each factory version it applied, computed on demand from
+  git, the manifest's history and `gh pr list`. Readings go in
+  `.agents/metrics/ledger.jsonl`. The ledger code it shares with
+  `tools/metrics.py` now lives in the skill's folder.
+- `create-pr`, the first time it reports a task's pull request (or `retro`
+  at the task's end, if a correction came first), asks one optional line: "How much did you have to
+  step in? none / some / a lot. Would you take this pull request as is?
+  yes / with edits / no." It never waits for a reply. An answer, if one
+  comes, is recorded with `metrics.py add-answer` in the same ledger, and
+  `compare` lists it beside that task's pull request and its numbers.
+  Answers are never counted into the numbers or a score.
 - `update-factory` skill: "update the factory" (or "is there an update?")
   in a repository reads the installed version from its manifest, shows what
   changed, and updates by following the factory's current `START.md`.

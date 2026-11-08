@@ -12,6 +12,10 @@ Each run gets its own snapshot of the scenario's repository in a scratch
 folder (FACTORY_EVAL_DIR, default: the system temp dir). Results land in
 <scratch>/results/<timestamp>/ as one JSON per run plus summary.json; a batch
 started in the same second as another gets <timestamp>.2 and so on.
+
+Every pass, and every --calibrate, also appends its numbers (no judge text or
+replies) to the committed ledger, evals/ledger.jsonl, with the factory version
+they measured. Compare versions with tools/metrics.py.
 """
 
 from __future__ import annotations
@@ -25,7 +29,9 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(1, str(Path(__file__).resolve().parent.parent / "tools"))
 import lib  # noqa: E402
+import metrics  # noqa: E402
 
 
 def load(scenario_id: str):
@@ -35,17 +41,33 @@ def load(scenario_id: str):
 def calibrate(scenario_ids: list[str]) -> int:
     root = Path(__file__).resolve().parent / "calibration"
     wrong = 0
+    judges = {}
     for sid in scenario_ids:
         mod = load(sid)
+        tally = judges.setdefault(sid, {"samples": 0, "agreed": 0})
         for want, folder in ((True, "good"), (False, "bad")):
             for sample in sorted((root / sid.lower() / folder).glob("*")):
                 got = mod.judge_accepts(sample.read_text())
                 ok = got == want
                 wrong += not ok
+                tally["samples"] += 1
+                tally["agreed"] += ok
                 print(f"{sid} {folder}/{sample.name}: judge {'accepts' if got else 'rejects'}"
                       f" {'ok' if ok else 'WRONG'}", flush=True)
     print("calibrated" if not wrong else f"{wrong} sample(s) judged wrong: fix the judge first")
+    stamp = time.strftime("%Y%m%d-%H%M%S") + "-calibrate-" + "-".join(scenario_ids)
+    keep_in_ledger(lambda: metrics.record_calibration(stamp, judges))
     return 1 if wrong else 0
+
+
+def keep_in_ledger(record) -> None:
+    """Append to the ledger; a ledger that can't be written never changes the outcome."""
+    try:
+        entry = record()
+    except Exception as e:
+        print(f"Ledger not updated: {e!r}", file=sys.stderr)
+        return
+    print(f"Ledger: {entry['kind']} {entry['id']} on {metrics.key_of(entry)} -> {metrics.LEDGER}")
 
 
 def main() -> int:
@@ -76,6 +98,7 @@ def main() -> int:
         logdir.mkdir(parents=True, exist_ok=True)
         t0 = time.time()
         started = lib.agents_started()
+        lib.reset_sessions()
         try:
             res = mod.run(lib.workdir() / "runs" / stamp / name, arm, logdir, args.model)
         except lib.UsageLimit as e:  # cut short by the account, not judged: void
@@ -85,7 +108,8 @@ def main() -> int:
                 res = {"pass": None, "void": f"setup error: {e!r}"}
             else:  # a crashed run is a failed run, with the reason kept
                 res = {"pass": False, "error": repr(e)}
-        res.update(scenario=sid, arm=arm, run=i, seconds=round(time.time() - t0))
+        res.update(scenario=sid, arm=arm, run=i, seconds=round(time.time() - t0),
+                   **lib.session_numbers())
         (logdir / "result.json").write_text(json.dumps(res, indent=2))
         verdict = "VOID" if res["pass"] is None else "PASS" if res["pass"] else "FAIL"
         print(f"{name}: {verdict}", flush=True)
@@ -115,6 +139,7 @@ def main() -> int:
             continue
         verdict = "meets" if s["meets_rate"] else "below"
         print(f"  {key}: {s['passed']}/{s['runs']} ({verdict} its rate of {s['rate']:.0%})")
+    keep_in_ledger(lambda: metrics.record_pass(stamp, args.model, results, summary))
     return 0
 
 
