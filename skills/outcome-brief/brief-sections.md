@@ -38,8 +38,16 @@ Rules:
   completely different implementation. "Never uses a database" is a
   constraint on the build and goes to the design brief.
 - **Every brief has must-nots.** When the person names none, propose the
-  likeliest way the value could be misused or misread, mark it as your call,
+  likeliest way the value could be misused or misread, mark it "my call",
   and ask.
+- **Edge cases too.** Say what the person meets, not what broke inside:
+  "if the browser can't keep their choices (private browsing, say)", not
+  "blocked storage, damaged data"; "the right theme from the first moment",
+  not "applies before first paint". Words like storage, server, backend,
+  database, cache or shell name a mechanism.
+- **Calls on the line they shape.** When you made a call, mark it on its `V`,
+  `B` or `X` line with a reason in value terms. There is no separate decisions
+  section, and calls about how wait for the design brief.
 - Short rows: put the edge case under the line as a note, not in the line.
 
 **Must not (`X`) or bound (`N`)?** Both say "don't", at different levels:

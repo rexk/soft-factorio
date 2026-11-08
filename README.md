@@ -18,8 +18,20 @@ Tell your repository's agent:
 
 It asks you one question (whether this repository sends lessons back), then
 opens a pull request with the skills, one marked block in `AGENTS.md`, and a
-record of what it installed. Run the same request later to update: local
-edits are kept, and the agent asks before overriding any.
+record of what it installed.
+
+## Update it
+
+Ask the repository's agent to update the factory, or whether there is an
+update. Its `update-factory` skill reads what was installed from
+`.agents/factory/manifest.json`, shows what changed since then, and on an
+update follows the factory's current `START.md`: local edits are kept, and
+the agent asks before overriding any. A repository installed before that
+skill existed updates with the apply request above, once.
+
+Changes that need a person to act (a harness setting, say) are marked
+**Action needed** in [CHANGELOG.md](CHANGELOG.md); the update's pull
+request lists them as a checklist.
 
 The factory's agents commit, push their branch and open pull requests
 without asking. To stop your harness prompting for each of those, see
@@ -33,6 +45,7 @@ what to keep guarded, for Claude Code and Codex.
 | Intent first | On a vague ask, the agent agrees a product brief (value and behaviour) before touching code (`outcome-brief`) |
 | Readable reports | Results, reviews and questions arrive as phone-friendly HTML pages (`html-for-humans`) |
 | Ship for review | Finished work arrives as one pull request with a clear title and description (`create-pr`) |
+| Stay current | "Update the factory" brings in its latest, keeping local edits (`update-factory`) |
 | Lean rules | One short marked block in `AGENTS.md`, plus a settings table; the repository's own rules win |
 | Any agent tool | Plain `SKILL.md` files, read by Claude Code, Codex and Cursor |
 

@@ -60,10 +60,16 @@ layouts has started designing too early.
    your reason**. Ask what's wrong or missing. *Done when* they confirm, or
    their corrections are folded in.
    - **They leave it to you** ("you decide", "your call", "whatever you
-     think"): take your recommendations, then go straight to step 5. Write
-     the brief with those choices marked as your calls, and let the brief
-     itself be the playback. They have handed you the decisions, not the
-     approval.
+     think"): take your recommendations, then go straight to step 5, and let
+     the brief itself be the playback. They have handed you the decisions,
+     not the approval. Sort each call before writing it down:
+     - **It shapes value, behaviour or a must-not** (who it's for, which
+       settings, what's left out): write it as that `V`, `B` or `X` line, marked "my call",
+       with a reason in the same terms.
+     - **It's about how** (where it gets built, how things are kept, what
+       runs behind it): keep it out of the product brief. Note it in the
+       state file's open list for the design brief, and mention it in your
+       reply so they can redirect early.
 5. **Write the product brief** as an html-for-humans page, using the sections
    and stable IDs in [brief-sections.md](brief-sections.md). It has three parts
    only:
@@ -76,10 +82,13 @@ layouts has started designing too early.
    - **Must not:** what the product must never do, even when it works: the
      misuse, misreading or harm that would defeat the value. Each line is
      observable too, so a test can prove it never happens. If the person named
-     none, propose the likeliest one as your call.
+     none, propose the likeliest one, marked "my call".
 
-   Bounds, latitude, not-now scope and build constraints, approaches the person named, your own calls and open
-   questions belong to the design brief.
+   Bounds, latitude, not-now scope and build constraints, approaches the
+   person named, your calls about how and open questions belong to the
+   design brief. So does what you found in the repo (which files exist, what
+   it holds): the product brief doesn't cite files. Add no "decided for you"
+   section; calls show on the lines they shape.
    [example-outcome-brief.html](example-outcome-brief.html) shows a filled
    product brief. *Done when* all three parts are filled.
 6. **Reader test.** Give **only the brief** to a fresh agent (a subagent, or a
