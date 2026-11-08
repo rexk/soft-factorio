@@ -4,6 +4,11 @@ Newest first. The factory has no release tags: a repository records the
 commit it installed, and an update lists the factory's commits since then.
 This file is the short, human summary.
 
+Mark an entry **Action needed:** when a repository's person must do something
+the helper can't, such as change a harness setting. An update prints the
+entries added since the installed version and lists those in its pull
+request.
+
 ## 2026-11-06
 
 - Eval ledger (`evals/ledger.jsonl`): every eval pass and `--calibrate`
@@ -13,6 +18,24 @@ This file is the short, human summary.
 - `tools/metrics.py`: `compare` puts versions side by side as JSON, or as a
   page with `--html`; `add-reading` records what someone thinks the numbers
   mean. No scores, verdicts or gates.
+- `update-factory` skill: "update the factory" (or "is there an update?")
+  in a repository reads the installed version from its manifest, shows what
+  changed, and updates by following the factory's current `START.md`.
+- `factory.py plan` and `apply` say when a repository is up to date, and
+  print the changelog entries added since the installed version.
+- Lessons sent upstream carry evidence (or say there is none) instead of a
+  factory version.
+- The harness settings guide explains why the harness keeps asking for
+  approval, with fixes.
+- `outcome-brief`: the product brief holds value and behaviour only. A call
+  the agent makes for the person goes on the line it shapes, marked "my
+  call"; a call about how goes to the design brief.
+
+## 2026-11-05
+
+- Harness settings guide (`guides/harness-settings.md`), pointed to from
+  every apply's pull request.
+- Project slugs are their keys; items are cited like issue keys.
 
 ## 2026-11-04
 

@@ -9,6 +9,12 @@ labels: lesson
 <!-- What the agent did, and what the person corrected or wished it had done.
 No names, paths, code or details private to the sending repository. -->
 
+## Evidence
+
+<!-- A run, a transcript excerpt or steps that show it happening, with the
+same privacy rule as above. If you don't have any, say so: we'll ask or try
+to reproduce it rather than guess. -->
+
 ## The lesson
 
 <!-- One or two sentences that would hold in any repository. -->
@@ -17,7 +23,3 @@ No names, paths, code or details private to the sending repository. -->
 
 <!-- Where it belongs in the factory: a skill, a guide, the rules block or a
 scenario. What it would say, and why that would have prevented this. -->
-
-## Factory version
-
-<!-- From the repository's .agents/factory/manifest. -->

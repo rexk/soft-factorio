@@ -115,6 +115,22 @@ def changes_since(factory: Path, version: str | None) -> list[str]:
     return log.splitlines()
 
 
+def changelog_since(factory: Path, version: str | None) -> list[str]:
+    """CHANGELOG.md lines the factory added since the installed version.
+
+    These carry what a person must do by hand after the update (entries marked
+    "Action needed"), which commit titles alone don't say.
+    """
+    if not version or version == "unversioned":
+        return []
+    since = version.removesuffix("-modified")
+    diff = git_out(factory, "diff", "--unified=0", f"{since}..HEAD", "--", "CHANGELOG.md")
+    if not diff:
+        return []
+    return [line[1:] for line in diff.splitlines()
+            if line.startswith("+") and not line.startswith("+++") and line[1:].strip()]
+
+
 # ----------------------------------------------------------- the repository
 
 def read_block(repo: Path) -> bytes | None:
@@ -318,10 +334,18 @@ def report(result: dict, applied: bool, factory: Path) -> str:
     unchanged = sum(s["action"] == "unchanged" for s in steps)
     if unchanged:
         lines.append(f"unchanged: {unchanged} file(s)")
+    if result["from"] and result["from"] == result["to"] and all(
+            s["action"] in ("unchanged", "keep-local", "clash") for s in steps):
+        lines.append("Up to date: the installed version is the factory's latest.")
     log = changes_since(factory, result["from"])
     if log:
         lines.append("\nFactory changes since the installed version:")
         lines += log
+    notes = changelog_since(factory, result["from"])
+    if notes:
+        lines.append("\nChangelog entries since the installed version "
+                     "(copy any \"Action needed\" items into the report for the person):")
+        lines += notes
     return "\n".join(lines)
 
 
