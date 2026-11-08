@@ -67,6 +67,31 @@ def workdir() -> Path:
     return root
 
 
+def claim_batch(stamp: str) -> str:
+    """Reserve runs/<name> and results/<name> in the eval folder for one batch.
+
+    The name is stamp, or stamp.2, stamp.3 and so on when another batch
+    (another invocation started in the same second, say) already holds it.
+    Both folders are created exclusively, so two batches never share one.
+    """
+    root = workdir()
+    n = 1
+    while True:
+        name = stamp if n == 1 else f"{stamp}.{n}"
+        n += 1
+        results, runs = root / "results" / name, root / "runs" / name
+        try:
+            results.mkdir(parents=True)
+        except FileExistsError:
+            continue
+        try:
+            runs.mkdir(parents=True)
+        except FileExistsError:  # left by an older batch: give the name up
+            results.rmdir()
+            continue
+        return name
+
+
 def snapshot(name: str, dest: Path) -> Path:
     """Copy a repository at its pinned commit into dest, cut off from any remote.
 

@@ -5,7 +5,8 @@ Key: `v1-build`
 Building v1 of the factory: approach A2 (start file, copied skills, a
 manifest, scenario evals). The product and design briefs are kept outside
 this repository; the behaviour lines (B1–B14) and scenarios (T1–T12) they
-define are mirrored in `evals/`.
+define are mirrored in `evals/`. B15 (update on request, T13) was added on
+2026-11-06 and still needs a line in the product brief.
 
 ## State
 
@@ -26,7 +27,7 @@ transcripts stay in the scratch folder.
 
 | Scenario | Behaviour | Result | Notes |
 |---|---|---|---|
-| T1 apply, then a vague ask | B1, B6 | 3/3 | agent applies the factory itself; 3/3 again on the retro rule and the START.md change |
+| T1 apply, then a vague ask | B1, B6 | 3/3 | agent applies the factory itself; 3/3 again on the retro rule and the START.md change. Fell to 4/6 on 2026-11-06 (briefs carried the agent's how-calls); 6/6 after `outcome-brief` sorted calls into the brief line they shape or the design brief (#9) |
 | T2 repo rules win | B2 | 3/3 | apply arm |
 | T3 update keeps local choices | B3 | 3/3 | 3/3 again after START.md began pointing to the settings guide. 2/3 first: the eval had no test runner on its allow-list, so the agent stopped before shipping; test commands now allowed |
 | T4 same in Codex (T1, preinstalled) | B4 | 3/3 | |
@@ -37,6 +38,7 @@ transcripts stay in the scratch folder.
 | T9 learn from corrections | B10 | 3/3 | 1/3 first; retro's Lessons table then gained a "why this stops it recurring" column and a row for every request |
 | T10 upstream only by consent | B11 | 3/3 | 3/3 again on the retro rule and the START.md change |
 | T11, T12 | B12, B14 | not built | |
+| T13 update on request | B15 | 3/3 | 2026-11-06. The person asks only "is there an update?" or "update the factory"; `update-factory` triggered by itself in every run |
 
 Known limits:
 - T4 covers T1 under Codex. Codex can't apply the factory headless (its
@@ -55,6 +57,9 @@ Known limits:
 - Does a product brief written in chat (not as a page) satisfy T1? The skill
   allows chat briefs for small asks; T1's code judge only accepts a page
   under `docs/`. A judge change, so the maintainer decides.
+- T1's judge reads every `docs/` page, so the project's README state file
+  counts as brief too. If runs fail on README content, judge only
+  `product.html`? A scenario change, so the maintainer decides (#9).
 - Take `Bash(git push:*)` off the `ask` list in the maintainer's own Claude
   Code settings, so pushes stop prompting (retro Q1)? The maintainer's call.
 - A headless browser for T6's render check; Codex outside its sandbox for
