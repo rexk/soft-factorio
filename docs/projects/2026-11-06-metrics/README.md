@@ -12,7 +12,7 @@ over time, with people and agents saying what they mean.
 | Research: what similar tools measure | Done: [research.md](research.md) |
 | Product brief | Approved 2026-11-06: [product.html](product.html) |
 | Design brief | A2 picked 2026-11-06: [design.html](design.html). One ledger per repository, in three stages |
-| Stage 1: factory eval ledger, compare, readings | In progress |
+| Stage 1: factory eval ledger, compare, readings | Built, in review: `evals/ledger.jsonl`, `tools/metrics.py`, `tests/test_metrics.py` |
 | Stage 2: numbers in adopting repositories | Not started |
 | Stage 3: optional quick answer at the retro's end-of-task step | Not started |
 

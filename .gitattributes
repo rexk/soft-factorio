@@ -1,0 +1,2 @@
+# The eval ledger is append-only: when two branches each add lines, keep both.
+evals/ledger.jsonl merge=union
