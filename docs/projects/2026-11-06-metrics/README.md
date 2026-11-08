@@ -14,7 +14,7 @@ over time, with people and agents saying what they mean.
 | Design brief | A2 picked 2026-11-06: [design.html](design.html). One ledger per repository, in three stages |
 | Stage 1: factory eval ledger, compare, readings | Built, in review: `evals/ledger.jsonl`, `tools/metrics.py`, `tests/test_metrics.py` |
 | Stage 2: numbers in adopting repositories | Built, in review: the `metrics` skill (`skills/metrics/`), installed by the factory; `tests/test_repo_metrics.py` |
-| Stage 3: optional quick answer at the retro's end-of-task step | Not started |
+| Stage 3: optional quick answer at the end of a task | Built, in review: create-pr step 10 asks the first time it reports the task's PR, retro step 6 only if a correction came first, `metrics.py add-answer` records in `.agents/metrics/ledger.jsonl`, `compare` shows each answer beside its pull request; T4 in `tests/test_repo_metrics.py`. T9 and T7 to rerun before release |
 
 ## Decided in the interview (2026-11-06)
 
@@ -68,7 +68,12 @@ The design brief got matching edits: T2, T10–T12, a new `metrics-N6`
 
 - `metrics-Q1` (2026-11-06): A2, the staged ledger.
 - `metrics-Q2` (2026-11-06): the quick answer is asked at the retro skill's
-  end-of-task step.
+  end-of-task step. Widened 2026-11-07: the T7 runs showed the retro never
+  runs on a task with no corrections, so `metrics-B4` went unmet there; now
+  create-pr asks it the first time it reports a task's PR, and the retro
+  only if no one asked yet, so it's asked once per task. In tasks the person
+  corrects after the PR opens, the question now comes before the
+  corrections.
 
 ## Next
 

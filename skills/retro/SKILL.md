@@ -58,6 +58,34 @@ whole session.
    anywhere. This holds for every lesson, including ones the person gives
    after you've run the retro: offer each as it comes, in the same reply
    that records it.
+6. **Ask how it went, without waiting.** In that same final reply, just
+   above the Lessons table, ask the person who gave you the task this one
+   line, word for word:
+
+   > Optional, no reply needed: How much did you have to step in? none / some / a lot. Would you take this pull request as is? yes / with edits / no.
+
+   Ask it in chat only, never in the pull request or a commit, and once per
+   task: if it was already asked in this conversation for this task
+   (`create-pr` asks when it first reports the pull request, unless a
+   correction came first), don't ask it again. It is never a checkpoint: the pull request is already open and the
+   other steps are done before you ask, and you end the reply as you would
+   without it. If they skip it, nothing changes: don't remind them or ask
+   again. If they answer, now or in a later message, record their choices
+   for that task's pull request with the metrics skill's script (installed
+   with this one):
+
+   ```bash
+   python3 .agents/skills/metrics/metrics.py add-answer --pr N \
+     --stepped-in "<none|some|a lot>" --take-as-is "<yes|with edits|no>"
+   ```
+
+   Leave out a question they didn't answer, and pass anything else they
+   said about it as `--note "<their words>"`. Commit
+   `.agents/metrics/ledger.jsonl` on the task's branch and push it, so the
+   answer lands with that pull request (or with the next one, if it has
+   merged). Never total, score or compare people by the answers. *Done
+   when* the question is in your final reply; an answer is recorded when
+   it comes.
 
 ## Rules
 

@@ -216,7 +216,8 @@ def render(page: dict, data: dict) -> str:
     versions_intro and numbers_intro (trusted HTML written by the tool),
     version_headers and version_cells(version) -> escaped HTML cells after
     the ID and version, short(key) for column heads, version_notes (text),
-    add_reading and json_command (shell commands).
+    add_reading and json_command (shell commands), and optionally
+    before_readings (a trusted HTML section put just before the readings).
     """
     e = html.escape
     vs = data["versions"]
@@ -281,6 +282,8 @@ def render(page: dict, data: dict) -> str:
         parts += [f'<li class="sub">Source: {e(s)}</li>' for s in srcs]
         parts.append("</ul></details></section>")
 
+    if page.get("before_readings"):
+        parts.append(page["before_readings"])
     parts.append('<section id="readings"><h2>Readings</h2>')
     if data["readings"]:
         parts.append("<p>What people and agents wrote about these versions, oldest first. "
