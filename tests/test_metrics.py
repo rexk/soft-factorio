@@ -21,7 +21,7 @@ sys.path.insert(0, str(ROOT / "tools"))
 import metrics  # noqa: E402
 
 COPIED = ["evals/run.py", "evals/lib.py", "evals/repos.json", "tools/metrics.py",
-          "tools/factory.py", ".gitignore"]
+          "tools/factory.py", "skills/metrics/metrics_ledger.py", ".gitignore"]
 
 STUB = '''import lib
 PASS_RATE = 0.8
