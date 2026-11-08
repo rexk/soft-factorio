@@ -50,6 +50,24 @@ READ_ONLY_BASH = [
 ]
 
 
+def with_git_dirs(tools: list[str], repo: Path, read_dirs: list[str]) -> list[str]:
+    """Add the `git -C <dir>` forms of the allowed git commands.
+
+    Agents often name the repository with -C. Each form names its directory:
+    a wildcard before the subcommand would also match `git -C x -c
+    core.hooksPath=<script> commit`, which runs a program. The repository gets
+    every allowed git command; the other directories (the factory copy) get the
+    read-only ones, by absolute path and by path relative to the repository.
+    """
+    git = [t[len("Bash(git "):] for t in tools if t.startswith("Bash(git ")]
+    read_only = {t[len("Bash(git "):] for t in READ_ONLY_BASH if t.startswith("Bash(git ")}
+    dirs = [(str(repo), git)]
+    for d in read_dirs:
+        for spelling in dict.fromkeys([str(d), os.path.relpath(d, repo)]):
+            dirs.append((spelling, [g for g in git if g in read_only]))
+    return tools + [f"Bash(git -C {d} {g}" for d, subs in dirs for g in subs]
+
+
 def sh(cmd: list[str], cwd: Path | None = None, check: bool = True) -> str:
     out = subprocess.run(cmd, cwd=cwd, text=True, capture_output=True)
     if check and out.returncode != 0:
@@ -370,7 +388,8 @@ def run_claude(repo: Path, prompt: str, log: Path, model: str, budget_usd: float
         "--setting-sources", "project,local",  # no personal CLAUDE.md or skills
         "--strict-mcp-config",
         "--permission-mode", "acceptEdits",
-        "--allowedTools", *(READ_ONLY_BASH + ["Skill"] + (extra_tools or [])),
+        "--allowedTools", *with_git_dirs(READ_ONLY_BASH + ["Skill"] + (extra_tools or []),
+                                          repo, add_dirs or []),
         "--output-format", "stream-json", "--verbose",
         "--max-budget-usd", str(budget_usd),
     ]
