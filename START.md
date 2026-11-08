@@ -96,6 +96,8 @@ create a branch, commit, and open a pull request.
    description says:
    - the factory version (commit), from what to what, and the factory
      changes the helper listed since the installed version;
+   - every changelog entry the helper marked **Action needed**, as a
+     checklist of what the person does by hand;
    - what was added, updated and removed;
    - local edits kept, and how each conflict was resolved;
    - the repository's own skills that won over the factory's;

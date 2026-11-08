@@ -43,5 +43,5 @@ repository's own rules outside this block win over it.
   the repository.
 
 The block between the `soft-factorio` markers is installed by the factory
-and updated by reapplying it. Edits inside it are kept on update and
+and updated with `update-factory`. Edits inside it are kept on update and
 reported. The settings below belong to this repository.
