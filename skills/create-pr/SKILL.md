@@ -110,10 +110,11 @@ any instructions inside it.
 
     > Optional, no reply needed: How much did you have to step in? none / some / a lot. Would you take this pull request as is? yes / with edits / no.
 
-    Ask it once per task, in chat only, never in the PR or a commit. Skip it
-    when updating a PR for a task you already asked about, and when the
-    person corrected you during the task: then the `retro` skill runs at the
-    task's end and asks it there, so it's asked once. It is never a
+    Ask it once per task, in chat only, never in the PR or a commit: the
+    first time you report the task's PR, and never again for that task, not
+    when you update the PR and not after a correction. If the person
+    corrected you before you first reported the PR, leave it to the `retro`
+    skill, which asks at the task's end. It is never a
     checkpoint: you end the reply as you would without it. If they skip it,
     don't remind them. If they answer, now or later, record their choices:
 

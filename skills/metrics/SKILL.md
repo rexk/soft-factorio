@@ -20,9 +20,9 @@ quick answers are stored, in `.agents/metrics/ledger.jsonl`.
 
 A quick answer is what the person who asked for a task said about it when
 it ended: how much they had to step in, and whether they would take the
-pull request as is. The `create-pr` skill asks when it reports the task's
-pull request, or the `retro` skill at its end-of-task step when the person
-corrected the agent during the task. Either records the answer with
+pull request as is. The `create-pr` skill asks the first time it reports
+the task's pull request, or the `retro` skill at its end-of-task step when a
+correction came before that; it is asked once per task. Either records the answer with
 `add-answer`. `compare` lists each answer beside
 its pull request's own numbers, apart from the numbers by version, which
 answers never change.

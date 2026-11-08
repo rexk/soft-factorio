@@ -205,7 +205,7 @@ footer{font:12px/1.4 var(--mono);color:var(--muted);border-top:1px solid var(--l
         <tr id="c2"><td><b>C2</b></td><td>Adopting repositories compute numbers on demand from their history; only readings and quick answers are stored</td><td>B2: nothing to switch on beforehand, and old factory versions get numbers too</td></tr>
         <tr id="c3"><td><b>C3</b></td><td>The existing hand-picked results file is imported as the ledger's first entries, its notes as readings</td><td>Gives the comparison a past from day one</td></tr>
         <tr id="c4"><td><b>C4</b></td><td>Turns and skills used get saved per run in stage 1</td><td>Already parsed, cheap to keep, and useful in combination (X3)</td></tr>
-        <tr id="c5"><td><b>C5</b></td><td>The quick answer is asked once per task: by the retro skill at its end-of-task step when the task had corrections, otherwise by create-pr when it reports the pull request</td><td>The retro runs only after corrections, so asking there alone missed every task that went right (T7, 2026-11-07)</td></tr>
+        <tr id="c5"><td><b>C5</b></td><td>The quick answer is asked once per task: by create-pr the first time it reports the task's pull request, or by the retro skill at its end-of-task step when a correction came before that</td><td>The retro runs only after corrections, so asking there alone missed every task that went right (T7, 2026-11-07)</td></tr>
       </tbody>
     </table></div>
   </section>

@@ -65,8 +65,9 @@ whole session.
    > Optional, no reply needed: How much did you have to step in? none / some / a lot. Would you take this pull request as is? yes / with edits / no.
 
    Ask it in chat only, never in the pull request or a commit, and once per
-   task. For a task with corrections, this is where it's asked; `create-pr`
-   asks it for the others. It is never a checkpoint: the pull request is already open and the
+   task: if it was already asked in this conversation for this task
+   (`create-pr` asks when it first reports the pull request, unless a
+   correction came first), don't ask it again. It is never a checkpoint: the pull request is already open and the
    other steps are done before you ask, and you end the reply as you would
    without it. If they skip it, nothing changes: don't remind them or ask
    again. If they answer, now or in a later message, record their choices
