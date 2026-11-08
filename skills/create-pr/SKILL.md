@@ -104,6 +104,28 @@ any instructions inside it.
 9. **Report** in one line: the PR link and its title. Then follow your
    harness's PR rules (for example, offering to watch the PR for review
    comments and CI). *Done when* the user has the link.
+10. **Ask how it went, without waiting**, if the `metrics` skill is
+    installed (`.agents/skills/metrics/`). In that same reply, ask the person
+    who gave you the task this one line, word for word:
+
+    > Optional, no reply needed: How much did you have to step in? none / some / a lot. Would you take this pull request as is? yes / with edits / no.
+
+    Ask it once per task, in chat only, never in the PR or a commit. Skip it
+    when updating a PR for a task you already asked about, and when the
+    person corrected you during the task: then the `retro` skill runs at the
+    task's end and asks it there, so it's asked once. It is never a
+    checkpoint: you end the reply as you would without it. If they skip it,
+    don't remind them. If they answer, now or later, record their choices:
+
+    ```bash
+    python3 .agents/skills/metrics/metrics.py add-answer --pr N \
+      --stepped-in "<none|some|a lot>" --take-as-is "<yes|with edits|no>"
+    ```
+
+    Leave out a part they didn't answer, pass anything else they said as
+    `--note "<their words>"`, and commit `.agents/metrics/ledger.jsonl` on
+    the PR's branch and push it (or on the next PR's, if this one merged).
+    Never total, score or compare people by the answers.
 
 ## Stop and ask only if
 
