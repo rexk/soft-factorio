@@ -28,6 +28,14 @@ Rules:
 - **Nothing about how.** Tools, file layouts, install methods and approaches
   the person named go to the design brief, where they are weighed against
   alternatives.
+- **Edge cases too.** Say what the person meets, not what broke inside:
+  "if the browser can't keep their choices (private browsing, say)", not
+  "blocked storage, damaged data"; "the right theme from the first moment",
+  not "applies before first paint". Words like storage, server, backend,
+  database, cache or shell name a mechanism.
+- **Calls on the line they shape.** When you made a call, mark it on its `V`
+  or `B` line with a reason in value terms. There is no separate decisions
+  section, and calls about how wait for the design brief.
 - Short rows: put the edge case under the line as a note, not in the line.
 
 ## Design brief: how, with evidence
